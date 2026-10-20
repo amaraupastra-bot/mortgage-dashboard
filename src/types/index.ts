@@ -1,0 +1,232 @@
+export type UserRole = 'ADMIN' | 'LOAN_OFFICER' | 'PROCESSOR';
+
+export type LoanStage = 
+  | 'Setup'
+  | 'In Progress'
+  | 'Blocked'
+  | 'Ready for Broker Review'
+  | 'Archived';
+
+export type ConditionStatus = 
+  | 'Open'
+  | 'Requested'
+  | 'Received'
+  | 'In Review'
+  | 'Needs Correction'
+  | 'Resolved';
+
+export type ConditionSource = 'Lender Initial' | 'Underwriting Prior to Doc' | 'Closing Prior to Funding' | 'Internal Broker';
+
+export type DocumentStatus = 
+  | 'Uploaded'
+  | 'Processing'
+  | 'Review Required'
+  | 'Accepted for Requirement'
+  | 'Rejected'
+  | 'Superseded';
+
+export type ExceptionStatus = 
+  | 'Open'
+  | 'Assigned'
+  | 'In Progress'
+  | 'Resolved'
+  | 'Dismissed';
+
+export type ExceptionSeverity = 'Urgent' | 'High' | 'Normal' | 'Low';
+
+export type ExceptionCategory = 
+  | 'File Integrity'
+  | 'Page Completeness'
+  | 'Date Range Mismatch'
+  | 'Missing Required Field'
+  | 'Requirement Coverage'
+  | 'Condition Overdue'
+  | 'AI Suggested Anomaly';
+
+export type TaskStatus = 
+  | 'To Do'
+  | 'In Progress'
+  | 'Waiting'
+  | 'Completed'
+  | 'Cancelled';
+
+export type TaskPriority = 'Urgent' | 'High' | 'Normal' | 'Low';
+
+export interface Workspace {
+  id: string;
+  name: string;
+  nmlsId: string;
+  contactEmail: string;
+  createdAt: string;
+}
+
+export interface User {
+  id: string;
+  workspaceId: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatarUrl?: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export interface Loan {
+  id: string;
+  workspaceId: string;
+  loanNumber: string; // e.g. "ML-2026-881"
+  borrowerDisplayName: string; // e.g. "R. Davis & M. Davis"
+  loanOfficerId: string;
+  processorId?: string;
+  loanOfficerName?: string;
+  processorName?: string;
+  stage: LoanStage;
+  loanAmount: number;
+  propertyAddress: string;
+  propertyType: string;
+  targetClosingDate: string; // YYYY-MM-DD
+  lenderName: string;
+  loanProgram: string;
+  readinessScore: number; // 0-100 calculated
+  hasBlockingExceptions: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Condition {
+  id: string;
+  workspaceId: string;
+  loanId: string;
+  title: string;
+  description: string;
+  source: ConditionSource;
+  status: ConditionStatus;
+  ownerId?: string;
+  ownerName?: string;
+  dueDate: string;
+  resolvedAt?: string;
+  resolvedById?: string;
+  resolutionNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+  linkedDocumentIds?: string[];
+}
+
+export interface Document {
+  id: string;
+  workspaceId: string;
+  loanId: string;
+  filename: string;
+  originalName: string;
+  docType: string; // e.g. "W2", "Paystub", "Bank Statement", "Appraisal", "Tax Return"
+  fileSize: number; // in bytes
+  mimeType: string;
+  status: DocumentStatus;
+  uploadedById: string;
+  uploadedByName: string;
+  uploadedAt: string;
+  reviewerId?: string;
+  reviewerName?: string;
+  reviewedAt?: string;
+  reviewerNotes?: string;
+  version: number;
+  supersededById?: string;
+  storagePath: string;
+  extractedMetadata?: {
+    documentDate?: string;
+    pageCount?: number;
+    borrowerName?: string;
+    detectedIncome?: number;
+    accountLast4?: string;
+    confidenceScore?: number;
+    isAiExtracted?: boolean;
+    missingFields?: string[];
+  };
+}
+
+export interface DocumentConditionLink {
+  id: string;
+  documentId: string;
+  conditionId: string;
+  createdAt: string;
+}
+
+export interface Exception {
+  id: string;
+  workspaceId: string;
+  loanId: string;
+  loanNumber: string;
+  borrowerDisplayName: string;
+  issue: string;
+  evidence: string;
+  category: ExceptionCategory;
+  severity: ExceptionSeverity;
+  severityReason: string;
+  status: ExceptionStatus;
+  isAiSuggested: boolean;
+  aiConfidence?: number;
+  responsibleUserId?: string;
+  responsibleUserName?: string;
+  dueDate?: string;
+  recommendedAction: string;
+  reviewerDecision?: 'Confirmed' | 'Dismissed' | 'Modified';
+  reviewerNotes?: string;
+  resolvedAt?: string;
+  resolvedById?: string;
+  resolvedByName?: string;
+  resolutionReason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Task {
+  id: string;
+  workspaceId: string;
+  loanId: string;
+  loanNumber: string;
+  borrowerDisplayName: string;
+  title: string;
+  description?: string;
+  assigneeId?: string;
+  assigneeName?: string;
+  dueDate: string;
+  priority: TaskPriority;
+  status: TaskStatus;
+  conditionId?: string;
+  documentId?: string;
+  exceptionId?: string;
+  completedAt?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ActivityLog {
+  id: string;
+  workspaceId: string;
+  loanId?: string;
+  loanNumber?: string;
+  actorId: string;
+  actorName: string;
+  actorRole: UserRole;
+  action: string;
+  entityType: 'LOAN' | 'CONDITION' | 'DOCUMENT' | 'EXCEPTION' | 'TASK' | 'USER' | 'SETTINGS';
+  entityId: string;
+  details: string;
+  timestamp: string;
+}
+
+export interface SystemSettings {
+  workspaceId: string;
+  brokerageName: string;
+  nmlsId: string;
+  contactEmail: string;
+  phone: string;
+  timezone: string;
+  aiProvider: 'deterministic' | 'openai' | 'anthropic';
+  aiModel: string;
+  hasApiKey: boolean;
+  minConfidenceThreshold: number;
+  dataRetentionDays: number;
+  emailAlertsEnabled: boolean;
+}
