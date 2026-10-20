@@ -92,6 +92,11 @@ export default function SettingsPage() {
     );
   }
 
+  const inputClass =
+    'w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white text-slate-900 font-medium disabled:bg-slate-100 disabled:text-slate-900 disabled:border-slate-300 disabled:opacity-100 focus:border-blue-600 focus:ring-1 focus:ring-blue-600';
+  const selectClass =
+    'w-full sm:w-80 px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 font-medium disabled:bg-slate-100 disabled:text-slate-900 disabled:border-slate-300 disabled:opacity-100 outline-none focus:border-blue-600';
+
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Title */}
@@ -100,30 +105,30 @@ export default function SettingsPage() {
           <Settings className="w-6 h-6 text-blue-600" />
           Workspace Configuration & Integrations
         </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-slate-600 mt-0.5">
           Configure brokerage identification, data retention policies, and file readiness checking engine rules.
         </p>
       </div>
 
       {!isAdmin && (
-        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-center gap-2">
-          <Lock className="w-4 h-4 shrink-0 text-amber-600" />
+        <div className="p-3 bg-amber-50 border border-amber-300 rounded-lg text-xs text-amber-900 flex items-center gap-2 font-medium">
+          <Lock className="w-4 h-4 shrink-0 text-amber-700" />
           <span>
-            You are logged in as <strong>{currentUser.name} ({currentUser.role})</strong>. Only Brokerage Admins may edit workspace settings. Fields are displayed in read-only mode.
+            You are currently viewing as <strong>{currentUser.name} ({currentUser.role})</strong>. Only Brokerage Admins may edit workspace settings. Switch to <strong>Sarah Jenkins (Admin)</strong> from the top right to edit.
           </span>
         </div>
       )}
 
       {saveSuccess && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+        <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-lg text-xs text-emerald-900 flex items-center gap-2 font-medium">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-700" />
           <span>Settings saved and applied successfully across the workspace.</span>
         </div>
       )}
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+        <div className="p-3 bg-red-50 border border-red-300 rounded-lg text-xs text-red-900 flex items-center gap-2 font-medium">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-700" />
           <span>{error}</span>
         </div>
       )}
@@ -144,7 +149,7 @@ export default function SettingsPage() {
                 disabled={!isAdmin}
                 value={settings.brokerageName}
                 onChange={(e) => setSettings({ ...settings, brokerageName: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none disabled:bg-slate-50"
+                className={inputClass}
               />
             </div>
 
@@ -155,7 +160,7 @@ export default function SettingsPage() {
                 disabled={!isAdmin}
                 value={settings.nmlsId}
                 onChange={(e) => setSettings({ ...settings, nmlsId: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none disabled:bg-slate-50 font-mono"
+                className={`${inputClass} font-mono`}
               />
             </div>
 
@@ -166,7 +171,7 @@ export default function SettingsPage() {
                 disabled={!isAdmin}
                 value={settings.contactEmail}
                 onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none disabled:bg-slate-50"
+                className={inputClass}
               />
             </div>
 
@@ -177,7 +182,7 @@ export default function SettingsPage() {
                 disabled={!isAdmin}
                 value={settings.phone}
                 onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none disabled:bg-slate-50"
+                className={inputClass}
               />
             </div>
           </div>
@@ -197,7 +202,7 @@ export default function SettingsPage() {
                 disabled={!isAdmin}
                 value={settings.aiProvider}
                 onChange={(e) => setSettings({ ...settings, aiProvider: e.target.value as any })}
-                className="w-full sm:w-80 px-3 py-2 border border-slate-300 rounded-lg bg-white outline-none disabled:bg-slate-50"
+                className={selectClass}
               >
                 <option value="deterministic">Deterministic Rule Engine (No External API Required)</option>
                 <option value="openai">OpenAI API (GPT-4o Document Extraction)</option>
@@ -219,7 +224,7 @@ export default function SettingsPage() {
                     type="password"
                     disabled={!isAdmin}
                     placeholder="sk-live-..."
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white font-mono"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none bg-white font-mono text-slate-900"
                   />
                   <p className="text-[10px] text-slate-500 mt-0.5">
                     Keys are kept secure in environment configuration and never exposed to client browsers.
@@ -240,7 +245,7 @@ export default function SettingsPage() {
                 disabled={!isAdmin}
                 value={settings.minConfidenceThreshold}
                 onChange={(e) => setSettings({ ...settings, minConfidenceThreshold: Number(e.target.value) })}
-                className="w-full max-w-sm accent-blue-600"
+                className="w-full max-w-sm accent-blue-600 cursor-pointer"
               />
               <p className="text-[11px] text-slate-500 mt-0.5">
                 Extractions scoring below this threshold are automatically flagged as &quot;Needs Human Review&quot;.
@@ -263,7 +268,7 @@ export default function SettingsPage() {
                 disabled={!isAdmin}
                 value={settings.dataRetentionDays}
                 onChange={(e) => setSettings({ ...settings, dataRetentionDays: Number(e.target.value) })}
-                className="w-full sm:w-80 px-3 py-2 border border-slate-300 rounded-lg bg-white outline-none disabled:bg-slate-50"
+                className={selectClass}
               >
                 <option value={2555}>7 Years (Standard US Federal Mortgage Record Retention)</option>
                 <option value={1825}>5 Years (State Specific Minimum)</option>

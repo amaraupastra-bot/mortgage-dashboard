@@ -16,7 +16,7 @@ export default function RootLayout({
   const [newLoanModalOpen, setNewLoanModalOpen] = useState(false);
 
   return (
-    <html lang="en">
+    <html lang="en" className="light" style={{ colorScheme: 'light' }}>
       <head>
         <title>MortgageLevels — Mortgage File Readiness & Workflow Exception Management</title>
         <meta
@@ -26,12 +26,12 @@ export default function RootLayout({
       </head>
       <body className="bg-slate-50 text-slate-900 antialiased min-h-screen">
         <AuthProvider>
-          <div className="flex min-h-screen">
+          <div className="flex min-h-screen bg-slate-50">
             <Suspense fallback={<aside className="hidden lg:block w-64 bg-[#0a1424] h-screen shrink-0" />}>
               <Sidebar mobileOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
             </Suspense>
 
-            <div className="flex-1 flex flex-col min-w-0">
+            <div className="flex-1 flex flex-col min-w-0 bg-slate-50">
               <Suspense fallback={<header className="h-16 bg-white border-b border-slate-200" />}>
                 <Header
                   onOpenMobileNav={() => setMobileNavOpen(true)}

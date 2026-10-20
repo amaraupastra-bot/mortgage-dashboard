@@ -110,33 +110,35 @@ export function Header({
           </button>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50 text-xs">
-              <div className="px-3 py-2 border-b border-slate-100 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 text-xs animate-in fade-in zoom-in-95 duration-100">
+              <div className="px-3.5 py-2.5 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50 rounded-t-xl">
                 Switch Role / Team Persona
               </div>
-              {availableUsers.map((u) => (
-                <button
-                  key={u.id}
-                  onClick={() => {
-                    switchUser(u.id);
-                    setShowUserMenu(false);
-                  }}
-                  className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-slate-50 transition ${
-                    u.id === currentUser.id ? 'bg-blue-50/70 font-semibold' : ''
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-800 flex items-center justify-center font-bold text-[10px]">
-                      {u.name[0]}
+              <div className="p-1 space-y-0.5">
+                {availableUsers.map((u) => (
+                  <button
+                    key={u.id}
+                    onClick={() => {
+                      switchUser(u.id);
+                      setShowUserMenu(false);
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between hover:bg-slate-50 transition ${
+                      u.id === currentUser.id ? 'bg-blue-50/80 font-semibold text-blue-900 border border-blue-100' : 'text-slate-800'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 mr-2">
+                      <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-800 flex items-center justify-center font-bold text-xs shrink-0">
+                        {u.name[0]}
+                      </div>
+                      <div className="min-w-0 truncate">
+                        <div className="text-slate-900 font-semibold leading-tight truncate">{u.name}</div>
+                        <div className="text-[10px] text-slate-500 truncate">{u.email}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-slate-900">{u.name}</div>
-                      <div className="text-[10px] text-slate-500">{u.email}</div>
-                    </div>
-                  </div>
-                  <RoleBadge role={u.role} />
-                </button>
-              ))}
+                    <RoleBadge role={u.role} />
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

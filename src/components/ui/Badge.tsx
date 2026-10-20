@@ -129,9 +129,9 @@ export function TaskStatusBadge({ status }: { status: TaskStatus }) {
 
 export function RoleBadge({ role }: { role: UserRole }) {
   const styles: Record<UserRole, string> = {
-    ADMIN: 'bg-slate-900 text-white border-slate-800',
-    LOAN_OFFICER: 'bg-blue-100 text-blue-800 border-blue-300',
-    PROCESSOR: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    ADMIN: 'bg-indigo-50 text-indigo-700 border-indigo-200 font-semibold',
+    LOAN_OFFICER: 'bg-blue-50 text-blue-700 border-blue-200 font-medium',
+    PROCESSOR: 'bg-emerald-50 text-emerald-700 border-emerald-200 font-medium',
   };
 
   const labels: Record<UserRole, string> = {
@@ -141,7 +141,7 @@ export function RoleBadge({ role }: { role: UserRole }) {
   };
 
   return (
-    <span className={cn('inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border', styles[role])}>
+    <span className={cn('inline-flex items-center px-2 py-0.5 rounded text-xs whitespace-nowrap border shrink-0', styles[role])}>
       {labels[role]}
     </span>
   );
