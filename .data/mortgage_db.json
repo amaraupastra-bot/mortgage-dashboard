@@ -82,7 +82,7 @@
       "readinessScore": 10,
       "hasBlockingExceptions": true,
       "createdAt": "2026-10-01T14:22:00Z",
-      "updatedAt": "2026-10-20T08:16:08.402Z"
+      "updatedAt": "2026-10-20T08:58:54.028Z"
     },
     {
       "id": "loan-2",
@@ -121,10 +121,13 @@
       "targetClosingDate": "2026-10-28",
       "lenderName": "Rocket Pro TPO",
       "loanProgram": "Jumbo 30-Year Fixed (Purchase)",
-      "readinessScore": 96,
+      "readinessScore": 100,
       "hasBlockingExceptions": false,
       "createdAt": "2026-09-28T09:40:00Z",
-      "updatedAt": "2026-10-20T08:15:00Z"
+      "updatedAt": "2026-10-20T08:56:24.102Z",
+      "actorId": "usr-1",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "ADMIN"
     },
     {
       "id": "loan-4",
@@ -486,14 +489,21 @@
       "category": "Page Completeness",
       "severity": "Urgent",
       "severityReason": "Underwriting will reject incomplete asset statement; closing scheduled in 12 days.",
-      "status": "Open",
+      "status": "Resolved",
       "isAiSuggested": false,
       "responsibleUserId": "usr-3",
       "responsibleUserName": "Elena Ramos",
       "dueDate": "2026-10-22",
       "recommendedAction": "Contact borrower to re-download full multi-page PDF from Chase online banking portal without truncating ending pages.",
       "createdAt": "2026-10-19T12:00:00Z",
-      "updatedAt": "2026-10-19T12:00:00Z"
+      "updatedAt": "2026-10-20T08:58:54.025Z",
+      "resolutionReason": "fg",
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "resolvedAt": "2026-10-20T08:58:54.023Z",
+      "resolvedById": "usr-2",
+      "resolvedByName": "David Miller"
     },
     {
       "id": "exc-2",
@@ -707,6 +717,48 @@
     }
   ],
   "activityLogs": [
+    {
+      "loanId": "loan-1",
+      "loanNumber": "ML-2026-881",
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "action": "EXCEPTION_RESOLVED",
+      "entityType": "EXCEPTION",
+      "entityId": "exc-1",
+      "details": "Resolved exception: \"Bank Statement missing final reconciliation page (Page 6 of 6)\" (fg)",
+      "id": "act-1792486734033-96",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T08:58:54.033Z"
+    },
+    {
+      "loanId": "loan-3",
+      "loanNumber": "ML-2026-883",
+      "actorId": "usr-1",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "ADMIN",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-3",
+      "details": "Stage updated from Ready for Broker Review to In Progress",
+      "id": "act-1792486584114-673",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T08:56:24.114Z"
+    },
+    {
+      "loanId": "loan-3",
+      "loanNumber": "ML-2026-883",
+      "actorId": "usr-1",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "ADMIN",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-3",
+      "details": "Stage updated from Ready for Broker Review to Setup",
+      "id": "act-1792486583355-873",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T08:56:23.355Z"
+    },
     {
       "loanId": "loan-1",
       "loanNumber": "ML-2026-881",

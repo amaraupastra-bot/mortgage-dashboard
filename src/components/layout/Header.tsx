@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { RoleBadge } from '@/components/ui/Badge';
 import {
@@ -12,6 +13,7 @@ import {
   ChevronDown,
   UserCheck,
   ShieldAlert,
+  ExternalLink,
 } from 'lucide-react';
 
 export function Header({
@@ -142,6 +144,17 @@ export function Header({
             </div>
           )}
         </div>
+
+        {/* Borrower Intake Link */}
+        <Link
+          href="/apply"
+          target="_blank"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition"
+          title="Open Public Borrower Intake Form"
+        >
+          <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+          <span>Borrower Portal</span>
+        </Link>
 
         {/* New Loan Action Button */}
         <button
