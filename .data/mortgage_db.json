@@ -188,10 +188,72 @@
       "readinessScore": 20,
       "hasBlockingExceptions": true,
       "createdAt": "2026-10-01T00:00:00Z",
-      "updatedAt": "2026-10-20T11:34:33.130Z",
+      "updatedAt": "2026-10-20T11:53:45.538Z",
       "actorId": "usr-isolated",
       "actorName": "Tom Bradley",
-      "actorRole": "ADMIN"
+      "actorRole": "ADMIN",
+      "form1003": {
+        "borrower": {
+          "fullName": "Secret Isolated Borrower",
+          "ssn": "***-**-9664",
+          "dob": "1984-06-14",
+          "maritalStatus": "Unmarried",
+          "dependentsCount": 1,
+          "phone": "(512) 555-0199",
+          "email": "secret@clientmail.com",
+          "currentAddress": "100 Hidden Valley Rd, Seattle, WA",
+          "yearsAtAddress": 4.5,
+          "housingStatus": "Rent"
+        },
+        "employment": {
+          "employerName": "Apex Technology Group LLC",
+          "jobTitle": "Senior Infrastructure Engineer",
+          "yearsOnJob": 5.2,
+          "selfEmployed": false,
+          "monthlyBaseIncome": 15789,
+          "monthlyOvertime": 0,
+          "monthlyBonus": 850,
+          "totalMonthlyIncome": 16639
+        },
+        "assets": {
+          "checkingBalance": 48000,
+          "savingsBalance": 72000,
+          "retirement401k": 210000,
+          "otherAssets": 12500,
+          "totalAssets": 342500
+        },
+        "liabilities": {
+          "creditCardsBalance": 3200,
+          "creditCardsMonthlyPayment": 110,
+          "autoLoanBalance": 16800,
+          "autoLoanMonthlyPayment": 420,
+          "studentLoansBalance": 11500,
+          "studentLoansMonthlyPayment": 180,
+          "totalMonthlyDebt": 710,
+          "dtiRatio": 33.8
+        },
+        "propertyAndLoan": {
+          "loanPurpose": "Purchase",
+          "propertyAddress": "100 Hidden Valley Rd, Seattle, WA",
+          "propertyType": "Single Family",
+          "occupancy": "Primary Residence",
+          "purchasePrice": 750000,
+          "loanAmount": 600000,
+          "ltvRatio": 80,
+          "interestRate": 6.375,
+          "loanTermMonths": 360
+        },
+        "declarations": {
+          "outstandingJudgments": false,
+          "declaredBankruptcyPast7Years": false,
+          "propertyForeclosedPast7Years": false,
+          "partyToLawsuit": false,
+          "presentlyDelinquentOnFederalDebt": false,
+          "usCitizen": true,
+          "permanentResident": false,
+          "primaryResidenceIntent": true
+        }
+      }
     },
     {
       "id": "loan-1792489257370",
@@ -851,6 +913,48 @@
     }
   ],
   "activityLogs": [
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-isolated",
+      "details": "Stage updated from Blocked to In Progress",
+      "id": "act-1792497225541-169",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:53:45.541Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-isolated",
+      "details": "Stage updated from Blocked to In Progress",
+      "id": "act-1792497223256-819",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:53:43.256Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "READINESS_CHECK_EXECUTED",
+      "entityType": "LOAN",
+      "entityId": "loan-isolated",
+      "details": "Executed File Readiness Check: Score 22%, 1 findings, 0 exceptions synced.",
+      "id": "act-1792497187134-437",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:53:07.134Z"
+    },
     {
       "actorId": "usr-isolated",
       "actorName": "Tom Bradley",

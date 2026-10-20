@@ -269,6 +269,31 @@ function FormsContent() {
     setSelectedFieldId(copy.id);
   };
 
+  // Delete entire form
+  const handleDeleteForm = async (formId: string, formTitle: string) => {
+    if (!confirm(`Are you sure you want to delete the form "${formTitle}"? This cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/forms/${formId}?workspaceId=${workspace.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (currentForm?.id === formId) {
+          setCurrentForm(null);
+          setActiveView('list');
+        }
+        fetchForms();
+      } else {
+        alert(data.error || 'Failed to delete form');
+      }
+    } catch {
+      alert('Failed to delete form');
+    }
+  };
+
   // Save current form changes
   const handleSaveStudioForm = async () => {
     if (!currentForm) return;
@@ -377,18 +402,28 @@ function FormsContent() {
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        form.status === 'Published'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          : 'bg-slate-100 text-slate-600 border-slate-200'
-                      }`}
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                          form.status === 'Published'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-slate-100 text-slate-600 border-slate-200'
+                        }`}
+                      >
+                        {form.status}
+                      </span>
+                      <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                        {form.submissionsCount || 0} Submissions
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => handleDeleteForm(form.id, form.title)}
+                      className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition"
+                      title="Delete this form"
                     >
-                      {form.status}
-                    </span>
-                    <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                      {form.submissionsCount || 0} Submissions
-                    </span>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
 
                   <h3 className="font-bold text-sm text-slate-900 leading-snug">{form.title}</h3>
@@ -415,14 +450,14 @@ function FormsContent() {
                     <Edit3 className="w-3.5 h-3.5 text-blue-400" /> Customize in Studio
                   </button>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="grid grid-cols-3 gap-2 text-xs">
                     <a
                       href={`/f/${form.id}`}
                       target="_blank"
                       rel="noreferrer"
                       className="flex items-center justify-center gap-1 py-1.5 px-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-semibold rounded-lg border border-slate-200 transition"
                     >
-                      <ExternalLink className="w-3.5 h-3.5 text-blue-600" /> Live View
+                      <ExternalLink className="w-3.5 h-3.5 text-blue-600" /> View
                     </a>
 
                     <button
@@ -432,7 +467,14 @@ function FormsContent() {
                       }}
                       className="flex items-center justify-center gap-1 py-1.5 px-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-lg border border-indigo-200 transition"
                     >
-                      <Code className="w-3.5 h-3.5" /> Embed Code
+                      <Code className="w-3.5 h-3.5" /> Embed
+                    </button>
+
+                    <button
+                      onClick={() => handleDeleteForm(form.id, form.title)}
+                      className="flex items-center justify-center gap-1 py-1.5 px-2 bg-red-50 hover:bg-red-100 text-red-700 font-semibold rounded-lg border border-red-200 transition"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-600" /> Delete
                     </button>
                   </div>
                 </div>
@@ -515,6 +557,15 @@ function FormsContent() {
             <option value="Published">Published</option>
             <option value="Draft">Draft</option>
           </select>
+
+          <button
+            onClick={() => handleDeleteForm(currentForm.id, currentForm.title)}
+            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-semibold rounded-lg border border-red-200 transition"
+            title="Delete this form"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-red-600" />
+            <span>Delete</span>
+          </button>
 
           <button
             onClick={handleSaveStudioForm}
@@ -1184,7 +1235,16 @@ function FormsContent() {
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex justify-end">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteForm(currentForm.id, currentForm.title)}
+                  className="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-semibold rounded-lg text-xs border border-red-200 transition flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                  <span>Delete Form Permanently</span>
+                </button>
+
                 <button
                   onClick={handleSaveStudioForm}
                   className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs shadow-xs"
