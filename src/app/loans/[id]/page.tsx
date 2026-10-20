@@ -47,6 +47,15 @@ import {
   User,
   ArrowLeft,
   X,
+  FileSpreadsheet,
+  Edit3,
+  Save,
+  ArrowRight,
+  ShieldCheck,
+  Check,
+  HelpCircle,
+  Info,
+  Lock,
 } from 'lucide-react';
 
 function LoanWorkspaceContent({ params }: { params: Promise<{ id: string }> }) {
@@ -77,6 +86,16 @@ function LoanWorkspaceContent({ params }: { params: Promise<{ id: string }> }) {
   const [showResolveExceptionModal, setShowResolveExceptionModal] = useState<Exception | null>(null);
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
 
+  // Stage Inspector Modal state
+  const [showStageInspectorModal, setShowStageInspectorModal] = useState(false);
+  const [targetStageToInspect, setTargetStageToInspect] = useState<LoanStage | null>(null);
+
+  // Form 1003 editing state
+  const [form1003Data, setForm1003Data] = useState<any>(null);
+  const [isEditing1003, setIsEditing1003] = useState(false);
+  const [saving1003, setSaving1003] = useState(false);
+  const [save1003Toast, setSave1003Toast] = useState(false);
+
   // Checking state
   const [runningCheck, setRunningCheck] = useState(false);
   const [checkReport, setCheckReport] = useState<any>(null);
@@ -89,6 +108,9 @@ function LoanWorkspaceContent({ params }: { params: Promise<{ id: string }> }) {
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Failed to fetch loan');
       setLoanData(json.data);
+      if (json.data?.loan?.form1003) {
+        setForm1003Data(json.data.loan.form1003);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -99,6 +121,38 @@ function LoanWorkspaceContent({ params }: { params: Promise<{ id: string }> }) {
   useEffect(() => {
     fetchLoanData();
   }, [fetchLoanData]);
+
+  // Handle saving 1003 URLA data
+  const handleSave1003 = async () => {
+    if (!form1003Data) return;
+    setSaving1003(true);
+    try {
+      const res = await fetch(`/api/loans/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspaceId: workspace.id,
+          form1003: form1003Data,
+          actorId: currentUser.id,
+          actorName: currentUser.name,
+          actorRole: currentUser.role,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsEditing1003(false);
+        setSave1003Toast(true);
+        setTimeout(() => setSave1003Toast(false), 3000);
+        fetchLoanData();
+      } else {
+        alert(data.error || 'Failed to save 1003 data');
+      }
+    } catch {
+      alert('Failed to save 1003 data');
+    } finally {
+      setSaving1003(false);
+    }
+  };
 
   // Handle stage change
   const handleUpdateStage = async (newStage: LoanStage) => {
@@ -255,28 +309,82 @@ function LoanWorkspaceContent({ params }: { params: Promise<{ id: string }> }) {
           </div>
         </div>
 
-        {/* Stage Selector Action Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-500 font-medium">Update Workflow Stage:</span>
-            {(['Setup', 'In Progress', 'Blocked', 'Ready for Broker Review', 'Archived'] as LoanStage[]).map((st) => (
+        {/* Interactive Visual Stage Stepper & Inspector Action Bar */}
+        <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Visual Milestones */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-slate-400 font-bold text-[11px] uppercase tracking-wider mr-1">
+                Workflow Stage:
+              </span>
+
+              {[
+                { stage: 'Setup', label: '1. Setup Intake' },
+                { stage: 'In Progress', label: '2. In Processing' },
+                { stage: 'Ready for Broker Review', label: '3. Broker Review' },
+                { stage: 'Archived', label: '4. Closed / Funded' },
+              ].map((step, idx) => {
+                const isCurrent = loan.stage === step.stage;
+                const isBlocked = loan.stage === 'Blocked';
+
+                return (
+                  <React.Fragment key={step.stage}>
+                    {idx > 0 && <span className="text-slate-300 font-bold">→</span>}
+                    <button
+                      onClick={() => {
+                        setTargetStageToInspect(step.stage as LoanStage);
+                        setShowStageInspectorModal(true);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border ${
+                        isCurrent
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs ring-2 ring-blue-500/20'
+                          : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                      }`}
+                    >
+                      {isCurrent && <CheckCircle2 className="w-3.5 h-3.5" />}
+                      <span>{step.label}</span>
+                    </button>
+                  </React.Fragment>
+                );
+              })}
+
+              {/* Blocked Flag */}
               <button
-                key={st}
-                onClick={() => handleUpdateStage(st)}
-                disabled={loan.stage === st}
-                className={`px-2.5 py-1 rounded text-xs font-semibold transition ${
-                  loan.stage === st
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                onClick={() => {
+                  setTargetStageToInspect('Blocked');
+                  setShowStageInspectorModal(true);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border ml-1 ${
+                  loan.stage === 'Blocked'
+                    ? 'bg-red-600 text-white border-red-600 shadow-xs ring-2 ring-red-500/20 animate-pulse'
+                    : 'bg-white hover:bg-red-50 text-red-600 border-red-200'
                 }`}
               >
-                {st}
+                <ShieldAlert className="w-3.5 h-3.5" />
+                <span>Blocked</span>
               </button>
-            ))}
+            </div>
+
+            {/* Inspector Trigger Button */}
+            <button
+              onClick={() => {
+                setTargetStageToInspect(loan.stage);
+                setShowStageInspectorModal(true);
+              }}
+              className="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+              <span>Inspect Stage & Process</span>
+            </button>
           </div>
 
-          <div className="text-slate-500 text-[11px]">
-            Officer: <strong className="text-slate-800">{loan.loanOfficerName || 'Unassigned'}</strong> • Processor: <strong className="text-slate-800">{loan.processorName || 'Unassigned'}</strong>
+          <div className="flex items-center justify-between text-slate-500 text-[11px] pt-1">
+            <div>
+              Officer: <strong className="text-slate-800">{loan.loanOfficerName || 'Unassigned'}</strong> • Processor: <strong className="text-slate-800">{loan.processorName || 'Unassigned'}</strong>
+            </div>
+            <div className="text-slate-400">
+              Click any stage to view requirements, verify 1003 details, and advance or move file.
+            </div>
           </div>
         </div>
       </div>
@@ -286,6 +394,7 @@ function LoanWorkspaceContent({ params }: { params: Promise<{ id: string }> }) {
         <nav className="flex space-x-2 sm:space-x-4 overflow-x-auto text-xs font-medium">
           {[
             { id: 'overview', label: 'Overview', icon: FolderKanban },
+            { id: '1003', label: 'Form 1003 (URLA)', icon: FileSpreadsheet },
             { id: 'conditions', label: `Conditions (${conditions.length})`, icon: FileCheck },
             { id: 'documents', label: `Documents (${documents.length})`, icon: FileText },
             { id: 'exceptions', label: `Exceptions (${openExceptions.length})`, icon: AlertOctagon, alert: openExceptions.length > 0 },
@@ -472,6 +581,445 @@ function LoanWorkspaceContent({ params }: { params: Promise<{ id: string }> }) {
                   <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Form 1003 (URLA) */}
+      {activeTab === '1003' && form1003Data && (
+        <div className="space-y-6 text-xs">
+          {/* 1003 Header */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                  Fannie Mae Form 1003 / Freddie Mac Form 65
+                </span>
+                <span className="text-[11px] text-slate-400 font-mono">Uniform Residential Loan Application</span>
+              </div>
+              <h2 className="text-lg font-bold text-slate-900 mt-1">
+                Form 1003 Application Dataset
+              </h2>
+              <p className="text-xs text-slate-500">
+                Borrower identity, employment, liquid asset verification, monthly debt liabilities, and statutory declarations.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {save1003Toast && (
+                <span className="text-xs text-emerald-700 font-semibold flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" /> 1003 Saved!
+                </span>
+              )}
+
+              {isEditing1003 ? (
+                <>
+                  <button
+                    onClick={() => {
+                      setIsEditing1003(false);
+                      if (loan.form1003) setForm1003Data(loan.form1003);
+                    }}
+                    className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSave1003}
+                    disabled={saving1003}
+                    className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition disabled:opacity-50"
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    {saving1003 ? 'Saving...' : 'Save 1003'}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setIsEditing1003(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xs transition"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-blue-400" />
+                  Edit 1003 Information
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Section 1: Borrower Information */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[11px] flex items-center justify-center font-bold">1</span>
+                Section 1: Borrower Identity & Contact
+              </h3>
+              <span className="text-[11px] text-slate-400">Primary Applicant</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Full Legal Name</label>
+                {isEditing1003 ? (
+                  <input
+                    value={form1003Data.borrower.fullName}
+                    onChange={(e) =>
+                      setForm1003Data({
+                        ...form1003Data,
+                        borrower: { ...form1003Data.borrower, fullName: e.target.value },
+                      })
+                    }
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none font-semibold text-slate-900"
+                  />
+                ) : (
+                  <span className="font-bold text-slate-800">{form1003Data.borrower.fullName}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Social Security Number</label>
+                <span className="font-mono font-semibold text-slate-800">{form1003Data.borrower.ssn}</span>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Date of Birth</label>
+                {isEditing1003 ? (
+                  <input
+                    type="date"
+                    value={form1003Data.borrower.dob}
+                    onChange={(e) =>
+                      setForm1003Data({
+                        ...form1003Data,
+                        borrower: { ...form1003Data.borrower, dob: e.target.value },
+                      })
+                    }
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none"
+                  />
+                ) : (
+                  <span className="font-semibold text-slate-800">{form1003Data.borrower.dob}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Marital Status</label>
+                {isEditing1003 ? (
+                  <select
+                    value={form1003Data.borrower.maritalStatus}
+                    onChange={(e) =>
+                      setForm1003Data({
+                        ...form1003Data,
+                        borrower: { ...form1003Data.borrower, maritalStatus: e.target.value as any },
+                      })
+                    }
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none bg-white font-medium"
+                  >
+                    <option value="Married">Married</option>
+                    <option value="Unmarried">Unmarried</option>
+                    <option value="Separated">Separated</option>
+                  </select>
+                ) : (
+                  <span className="font-semibold text-slate-800">{form1003Data.borrower.maritalStatus}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Phone Number</label>
+                {isEditing1003 ? (
+                  <input
+                    value={form1003Data.borrower.phone}
+                    onChange={(e) =>
+                      setForm1003Data({
+                        ...form1003Data,
+                        borrower: { ...form1003Data.borrower, phone: e.target.value },
+                      })
+                    }
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none"
+                  />
+                ) : (
+                  <span className="font-semibold text-slate-800">{form1003Data.borrower.phone}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Email Address</label>
+                {isEditing1003 ? (
+                  <input
+                    value={form1003Data.borrower.email}
+                    onChange={(e) =>
+                      setForm1003Data({
+                        ...form1003Data,
+                        borrower: { ...form1003Data.borrower, email: e.target.value },
+                      })
+                    }
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none"
+                  />
+                ) : (
+                  <span className="font-semibold text-slate-800">{form1003Data.borrower.email}</span>
+                )}
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Current Residence Address</label>
+                {isEditing1003 ? (
+                  <input
+                    value={form1003Data.borrower.currentAddress}
+                    onChange={(e) =>
+                      setForm1003Data({
+                        ...form1003Data,
+                        borrower: { ...form1003Data.borrower, currentAddress: e.target.value },
+                      })
+                    }
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none"
+                  />
+                ) : (
+                  <span className="font-semibold text-slate-800">{form1003Data.borrower.currentAddress}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Housing Status & Tenure</label>
+                <span className="font-semibold text-slate-800">
+                  {form1003Data.borrower.housingStatus} ({form1003Data.borrower.yearsAtAddress} years)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 1b: Employment & Income */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[11px] flex items-center justify-center font-bold">1b</span>
+                Section 1b: Current Employment & Monthly Income
+              </h3>
+              <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                Gross: {formatCurrency(form1003Data.employment.totalMonthlyIncome)} / mo
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Current Employer</label>
+                {isEditing1003 ? (
+                  <input
+                    value={form1003Data.employment.employerName}
+                    onChange={(e) =>
+                      setForm1003Data({
+                        ...form1003Data,
+                        employment: { ...form1003Data.employment, employerName: e.target.value },
+                      })
+                    }
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none font-semibold text-slate-900"
+                  />
+                ) : (
+                  <span className="font-bold text-slate-800">{form1003Data.employment.employerName}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Job Title / Position</label>
+                {isEditing1003 ? (
+                  <input
+                    value={form1003Data.employment.jobTitle}
+                    onChange={(e) =>
+                      setForm1003Data({
+                        ...form1003Data,
+                        employment: { ...form1003Data.employment, jobTitle: e.target.value },
+                      })
+                    }
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none"
+                  />
+                ) : (
+                  <span className="font-semibold text-slate-800">{form1003Data.employment.jobTitle}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Tenure on Job</label>
+                <span className="font-semibold text-slate-800">{form1003Data.employment.yearsOnJob} Years</span>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Base Monthly Income ($)</label>
+                {isEditing1003 ? (
+                  <input
+                    type="number"
+                    value={form1003Data.employment.monthlyBaseIncome}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setForm1003Data({
+                        ...form1003Data,
+                        employment: {
+                          ...form1003Data.employment,
+                          monthlyBaseIncome: val,
+                          totalMonthlyIncome: val + form1003Data.employment.monthlyBonus + form1003Data.employment.monthlyOvertime,
+                        },
+                      });
+                    }}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg outline-none"
+                  />
+                ) : (
+                  <span className="font-bold text-slate-900">{formatCurrency(form1003Data.employment.monthlyBaseIncome)}</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Monthly Bonus / Commission</label>
+                <span className="font-semibold text-slate-800">{formatCurrency(form1003Data.employment.monthlyBonus)}</span>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 text-[10px] uppercase font-semibold mb-1">Total Qualifying Income</label>
+                <span className="font-extrabold text-blue-700 text-sm">
+                  {formatCurrency(form1003Data.employment.totalMonthlyIncome)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Financial Assets & Liabilities */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Assets */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[11px] flex items-center justify-center font-bold">2a</span>
+                  Assets (Bank & Retirement)
+                </h3>
+                <span className="font-bold text-emerald-700 text-xs">{formatCurrency(form1003Data.assets.totalAssets)}</span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 font-medium">Checking Accounts</span>
+                  <span className="font-bold text-slate-900">{formatCurrency(form1003Data.assets.checkingBalance)}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 font-medium">Savings / Money Market</span>
+                  <span className="font-bold text-slate-900">{formatCurrency(form1003Data.assets.savingsBalance)}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 font-medium">401(k) / Vested Retirement</span>
+                  <span className="font-bold text-slate-900">{formatCurrency(form1003Data.assets.retirement401k)}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 font-medium">Other Liquid Assets</span>
+                  <span className="font-bold text-slate-900">{formatCurrency(form1003Data.assets.otherAssets)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Liabilities */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[11px] flex items-center justify-center font-bold">2b</span>
+                  Monthly Liabilities & DTI
+                </h3>
+                <span className="font-bold text-slate-800 text-xs">
+                  DTI: <strong className="text-blue-700">{form1003Data.liabilities.dtiRatio}%</strong>
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 font-medium">Revolving Credit Cards</span>
+                  <span className="font-bold text-slate-900">
+                    {formatCurrency(form1003Data.liabilities.creditCardsMonthlyPayment)}/mo (Bal: {formatCurrency(form1003Data.liabilities.creditCardsBalance)})
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 font-medium">Automobile Installment Loan</span>
+                  <span className="font-bold text-slate-900">
+                    {formatCurrency(form1003Data.liabilities.autoLoanMonthlyPayment)}/mo (Bal: {formatCurrency(form1003Data.liabilities.autoLoanBalance)})
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-lg bg-slate-50 border border-slate-100">
+                  <span className="text-slate-600 font-medium">Student Loans (Deferred/Active)</span>
+                  <span className="font-bold text-slate-900">
+                    {formatCurrency(form1003Data.liabilities.studentLoansMonthlyPayment)}/mo (Bal: {formatCurrency(form1003Data.liabilities.studentLoansBalance)})
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-lg bg-blue-50 border border-blue-200 font-semibold">
+                  <span className="text-blue-900">Total Monthly Debt Service</span>
+                  <span className="font-bold text-blue-800">{formatCurrency(form1003Data.liabilities.totalMonthlyDebt)}/mo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Loan and Property Information */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[11px] flex items-center justify-center font-bold">3</span>
+                Section 3: Loan Terms & Subject Property
+              </h3>
+              <span className="text-xs font-bold text-slate-800">
+                LTV: <strong className="text-blue-700">{form1003Data.propertyAndLoan.ltvRatio}%</strong>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Loan Purpose</span>
+                <span className="font-bold text-slate-800">{form1003Data.propertyAndLoan.loanPurpose}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Occupancy Type</span>
+                <span className="font-semibold text-slate-800">{form1003Data.propertyAndLoan.occupancy}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Purchase Price / Appraised</span>
+                <span className="font-bold text-slate-800">{formatCurrency(form1003Data.propertyAndLoan.purchasePrice)}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Note Amount ($)</span>
+                <span className="font-bold text-blue-700">{formatCurrency(form1003Data.propertyAndLoan.loanAmount)}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Interest Rate</span>
+                <span className="font-bold text-slate-800">{form1003Data.propertyAndLoan.interestRate}%</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Amortization Term</span>
+                <span className="font-semibold text-slate-800">30 Years (360 Months)</span>
+              </div>
+              <div className="sm:col-span-2">
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">Subject Property</span>
+                <span className="font-semibold text-slate-800 truncate block">{form1003Data.propertyAndLoan.propertyAddress}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Declarations Checklist */}
+          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[11px] flex items-center justify-center font-bold">4</span>
+                Section 4: Statutory Borrower Declarations
+              </h3>
+              <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                <Check className="w-3.5 h-3.5" /> All Disclosures Cleared
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              {[
+                { label: 'Outstanding judgments against applicant?', val: form1003Data.declarations.outstandingJudgments },
+                { label: 'Declared bankruptcy in the past 7 years?', val: form1003Data.declarations.declaredBankruptcyPast7Years },
+                { label: 'Property foreclosed upon or deed in lieu in past 7 years?', val: form1003Data.declarations.propertyForeclosedPast7Years },
+                { label: 'Party to a lawsuit or personal debt arbitration?', val: form1003Data.declarations.partyToLawsuit },
+                { label: 'Presently delinquent on federal debt / student loan?', val: form1003Data.declarations.presentlyDelinquentOnFederalDebt },
+                { label: 'US Citizen / Lawful Permanent Resident?', val: form1003Data.declarations.usCitizen },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 bg-slate-50/50">
+                  <span className="text-slate-700 font-medium pr-2">{item.label}</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    item.val ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                  }`}>
+                    {item.val ? 'YES' : 'NO'}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -1630,6 +2178,236 @@ function LoanWorkspaceContent({ params }: { params: Promise<{ id: string }> }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 8. Stage & Process Readiness Inspector Modal */}
+      {showStageInspectorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full p-6 space-y-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">
+                    Stage Process & Requirements Inspector
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Evaluating file completeness, Form 1003 verification, and condition hurdles.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowStageInspectorModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Current vs Target Stage Status */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div>
+                  <span className="text-slate-400 text-[10px] uppercase font-bold block">Current Stage</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <StageBadge stage={loan.stage} />
+                    <span className="font-bold text-slate-800">
+                      {loan.stage === 'Setup' && 'Initial Intake & 1003 Capture'}
+                      {loan.stage === 'In Progress' && 'Active Processing & Condition Gathering'}
+                      {loan.stage === 'Ready for Broker Review' && 'Final Underwriting & Clear to Close'}
+                      {loan.stage === 'Blocked' && 'Blocked by Critical Exceptions'}
+                      {loan.stage === 'Archived' && 'Funded / Closed'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="sm:text-right">
+                  <span className="text-slate-400 text-[10px] uppercase font-bold block">File Readiness</span>
+                  <div className="text-sm font-extrabold text-blue-700">{loan.readinessScore}% Complete</div>
+                </div>
+              </div>
+
+              {/* Stage Progression Path */}
+              <div className="pt-2 border-t border-slate-200 flex items-center justify-between gap-1 text-[11px] text-slate-600 font-semibold overflow-x-auto">
+                {(['Setup', 'In Progress', 'Ready for Broker Review', 'Archived'] as LoanStage[]).map((st) => {
+                  const isCurrent = loan.stage === st;
+                  const isTarget = (targetStageToInspect || loan.stage) === st;
+                  return (
+                    <button
+                      key={st}
+                      onClick={() => setTargetStageToInspect(st)}
+                      className={`px-2.5 py-1 rounded-md transition border ${
+                        isTarget
+                          ? 'border-blue-600 bg-blue-50 text-blue-800 font-bold'
+                          : isCurrent
+                          ? 'border-slate-400 bg-slate-200 text-slate-900 font-bold'
+                          : 'border-transparent text-slate-500 hover:text-slate-900'
+                      }`}
+                    >
+                      {st}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Stage Requirements Checklist */}
+            <div className="space-y-3 text-xs">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700">
+                Process Verification for: <span className="text-blue-700">{targetStageToInspect || loan.stage}</span>
+              </h4>
+
+              <div className="space-y-2">
+                {/* 1. Form 1003 Data */}
+                <div className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                      <Check className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-slate-800 block">Form 1003 URLA Application</span>
+                      <span className="text-[11px] text-slate-500">
+                        Borrower ID, income ({formatCurrency(form1003Data?.employment?.totalMonthlyIncome || 14500)}/mo), assets & DTI ({form1003Data?.liabilities?.dtiRatio || 33.8}%) verified.
+                      </span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-700 rounded border border-emerald-200">
+                    COMPLETE
+                  </span>
+                </div>
+
+                {/* 2. Document Checklist */}
+                <div className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+                      documents.length >= 2 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {documents.length >= 2 ? <Check className="w-3.5 h-3.5" /> : <AlertOctagon className="w-3.5 h-3.5" />}
+                    </div>
+                    <div>
+                      <span className="font-bold text-slate-800 block">Mandatory Document Package</span>
+                      <span className="text-[11px] text-slate-500">
+                        {documents.length} files attached (Paystubs, W-2s, Statements, IRS 4506-C).
+                      </span>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                    documents.length >= 2 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                  }`}>
+                    {documents.length >= 2 ? 'SATISFIED' : 'NEEDS DOCS'}
+                  </span>
+                </div>
+
+                {/* 3. Blocking Exceptions Radar */}
+                <div className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+                      openExceptions.length === 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {openExceptions.length === 0 ? <Check className="w-3.5 h-3.5" /> : <ShieldAlert className="w-3.5 h-3.5" />}
+                    </div>
+                    <div>
+                      <span className="font-bold text-slate-800 block">Blocking Exceptions & Anomalies</span>
+                      <span className="text-[11px] text-slate-500">
+                        {openExceptions.length === 0
+                          ? 'Zero unresolved exceptions. Clean audit runway.'
+                          : `${openExceptions.length} active exception(s) require processor justification.`}
+                      </span>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                    openExceptions.length === 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
+                  }`}>
+                    {openExceptions.length === 0 ? 'CLEAR' : `${openExceptions.length} OPEN`}
+                  </span>
+                </div>
+
+                {/* 4. Readiness Score Threshold */}
+                <div className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
+                      loan.readinessScore >= 70 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {loan.readinessScore >= 70 ? <Check className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    </div>
+                    <div>
+                      <span className="font-bold text-slate-800 block">File Readiness Threshold</span>
+                      <span className="text-[11px] text-slate-500">
+                        Current score: <strong>{loan.readinessScore}%</strong> (Target for Broker Review: 70%+).
+                      </span>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                    loan.readinessScore >= 70 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                  }`}>
+                    {loan.readinessScore >= 70 ? 'PASS' : 'IN PROGRESS'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Transition Action Buttons */}
+            <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2">
+                {/* Promote to Next Stage */}
+                {loan.stage !== 'Archived' && (
+                  <button
+                    onClick={() => {
+                      const nextStage: Record<LoanStage, LoanStage> = {
+                        'Setup': 'In Progress',
+                        'In Progress': 'Ready for Broker Review',
+                        'Ready for Broker Review': 'Archived',
+                        'Blocked': 'In Progress',
+                        'Archived': 'Archived',
+                      };
+                      handleUpdateStage(nextStage[loan.stage]);
+                      setShowStageInspectorModal(false);
+                    }}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-xs transition flex items-center gap-1.5"
+                  >
+                    <span>Advance to Next Stage</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+
+                {/* Flag as Blocked toggle */}
+                {loan.stage !== 'Blocked' ? (
+                  <button
+                    onClick={() => {
+                      handleUpdateStage('Blocked');
+                      setShowStageInspectorModal(false);
+                    }}
+                    className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-semibold rounded-xl border border-red-200 transition flex items-center gap-1.5"
+                  >
+                    <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
+                    <span>Flag as Blocked</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      handleUpdateStage('In Progress');
+                      setShowStageInspectorModal(false);
+                    }}
+                    className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold rounded-xl border border-emerald-200 transition flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Unblock & Resume Processing</span>
+                  </button>
+                )}
+              </div>
+
+              <button
+                onClick={() => setShowStageInspectorModal(false)}
+                className="px-4 py-2 border border-slate-300 rounded-xl text-slate-700 font-semibold hover:bg-slate-50 transition"
+              >
+                Close Inspector
+              </button>
+            </div>
           </div>
         </div>
       )}

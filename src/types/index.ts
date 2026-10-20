@@ -71,6 +71,69 @@ export interface User {
   createdAt: string;
 }
 
+export interface Form1003Data {
+  borrower: {
+    fullName: string;
+    ssn: string;
+    dob: string;
+    maritalStatus: 'Married' | 'Unmarried' | 'Separated';
+    dependentsCount: number;
+    phone: string;
+    email: string;
+    currentAddress: string;
+    yearsAtAddress: number;
+    housingStatus: 'Own' | 'Rent' | 'Living with family';
+  };
+  employment: {
+    employerName: string;
+    jobTitle: string;
+    yearsOnJob: number;
+    selfEmployed: boolean;
+    monthlyBaseIncome: number;
+    monthlyOvertime: number;
+    monthlyBonus: number;
+    totalMonthlyIncome: number;
+  };
+  assets: {
+    checkingBalance: number;
+    savingsBalance: number;
+    retirement401k: number;
+    otherAssets: number;
+    totalAssets: number;
+  };
+  liabilities: {
+    creditCardsBalance: number;
+    creditCardsMonthlyPayment: number;
+    autoLoanBalance: number;
+    autoLoanMonthlyPayment: number;
+    studentLoansBalance: number;
+    studentLoansMonthlyPayment: number;
+    totalMonthlyDebt: number;
+    dtiRatio: number;
+  };
+  propertyAndLoan: {
+    loanPurpose: 'Purchase' | 'Refinance' | 'Cash-Out Refinance';
+    propertyAddress: string;
+    propertyType: string;
+    occupancy: 'Primary Residence' | 'Second Home' | 'Investment Property';
+    purchasePrice: number;
+    loanAmount: number;
+    ltvRatio: number;
+    interestRate: number;
+    loanTermMonths: number;
+  };
+  declarations: {
+    outstandingJudgments: boolean;
+    declaredBankruptcyPast7Years: boolean;
+    propertyForeclosedPast7Years: boolean;
+    partyToLawsuit: boolean;
+    presentlyDelinquentOnFederalDebt: boolean;
+    usCitizen: boolean;
+    permanentResident: boolean;
+    primaryResidenceIntent: boolean;
+  };
+}
+
 export interface Loan {
   id: string;
   workspaceId: string;
@@ -89,6 +152,7 @@ export interface Loan {
   loanProgram: string;
   readinessScore: number; // 0-100 calculated
   hasBlockingExceptions: boolean;
+  form1003?: Form1003Data;
   createdAt: string;
   updatedAt: string;
 }

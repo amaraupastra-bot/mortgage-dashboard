@@ -15,6 +15,7 @@ import {
   CustomForm,
   FormSubmission,
   FormField,
+  Form1003Data,
 } from '@/types';
 
 interface DatabaseSchema {
@@ -915,6 +916,76 @@ export function updateUser(workspaceId: string, id: string, updates: Partial<Use
   return db.users[idx];
 }
 
+export function generateDefault1003(loan: Loan): Form1003Data {
+  const isRefi = (loan.loanProgram || '').toLowerCase().includes('refinance');
+  const baseIncome = Math.max(7500, Math.round(loan.loanAmount / 38));
+  const purchasePrice = isRefi ? Math.round(loan.loanAmount * 1.35) : Math.round(loan.loanAmount * 1.25);
+  const ltv = Math.round((loan.loanAmount / purchasePrice) * 100);
+
+  return {
+    borrower: {
+      fullName: loan.borrowerDisplayName,
+      ssn: `***-**-${Math.floor(1000 + Math.random() * 9000)}`,
+      dob: '1984-06-14',
+      maritalStatus: loan.borrowerDisplayName.includes('&') ? 'Married' : 'Unmarried',
+      dependentsCount: 1,
+      phone: '(512) 555-0199',
+      email: `${loan.borrowerDisplayName.toLowerCase().split(' ')[0].replace(/[^a-z]/g, '') || 'borrower'}@clientmail.com`,
+      currentAddress: loan.propertyAddress || '742 Evergreen Terrace, Austin, TX 78701',
+      yearsAtAddress: 4.5,
+      housingStatus: isRefi ? 'Own' : 'Rent',
+    },
+    employment: {
+      employerName: 'Apex Technology Group LLC',
+      jobTitle: 'Senior Infrastructure Engineer',
+      yearsOnJob: 5.2,
+      selfEmployed: false,
+      monthlyBaseIncome: baseIncome,
+      monthlyOvertime: 0,
+      monthlyBonus: 850,
+      totalMonthlyIncome: baseIncome + 850,
+    },
+    assets: {
+      checkingBalance: Math.round(loan.loanAmount * 0.08),
+      savingsBalance: Math.round(loan.loanAmount * 0.12),
+      retirement401k: Math.round(loan.loanAmount * 0.35),
+      otherAssets: 12500,
+      totalAssets: Math.round(loan.loanAmount * 0.55) + 12500,
+    },
+    liabilities: {
+      creditCardsBalance: 3200,
+      creditCardsMonthlyPayment: 110,
+      autoLoanBalance: 16800,
+      autoLoanMonthlyPayment: 420,
+      studentLoansBalance: 11500,
+      studentLoansMonthlyPayment: 180,
+      totalMonthlyDebt: 710,
+      dtiRatio: 33.8,
+    },
+    propertyAndLoan: {
+      loanPurpose: isRefi ? 'Refinance' : 'Purchase',
+      propertyAddress: loan.propertyAddress,
+      propertyType: loan.propertyType,
+      occupancy: 'Primary Residence',
+      purchasePrice,
+      loanAmount: loan.loanAmount,
+      ltvRatio: ltv,
+      interestRate: 6.375,
+      loanTermMonths: 360,
+    },
+    declarations: {
+      outstandingJudgments: false,
+      declaredBankruptcyPast7Years: false,
+      propertyForeclosedPast7Years: false,
+      partyToLawsuit: false,
+      presentlyDelinquentOnFederalDebt: false,
+      usCitizen: true,
+      permanentResident: false,
+      primaryResidenceIntent: true,
+    },
+  };
+}
+
 // Loans
 export function getLoans(workspaceId: string): Loan[] {
   const db = getDatabase();
@@ -923,7 +994,11 @@ export function getLoans(workspaceId: string): Loan[] {
 
 export function getLoanById(workspaceId: string, id: string): Loan | undefined {
   const db = getDatabase();
-  return db.loans.find((l) => l.workspaceId === workspaceId && l.id === id);
+  const loan = db.loans.find((l) => l.workspaceId === workspaceId && l.id === id);
+  if (loan && !loan.form1003) {
+    loan.form1003 = generateDefault1003(loan);
+  }
+  return loan;
 }
 
 export function createLoan(workspaceId: string, loanData: Omit<Loan, 'id' | 'workspaceId' | 'createdAt' | 'updatedAt' | 'readinessScore' | 'hasBlockingExceptions'>): Loan {

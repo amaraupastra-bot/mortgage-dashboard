@@ -178,17 +178,20 @@
       "borrowerDisplayName": "Secret Isolated Borrower",
       "loanOfficerId": "usr-isolated",
       "loanOfficerName": "Tom Bradley",
-      "stage": "Setup",
+      "stage": "Blocked",
       "loanAmount": 600000,
       "propertyAddress": "100 Hidden Valley Rd, Seattle, WA",
       "propertyType": "Single Family",
       "targetClosingDate": "2026-12-01",
       "lenderName": "Summit Capital",
       "loanProgram": "Conventional 30-Year",
-      "readinessScore": 30,
-      "hasBlockingExceptions": false,
+      "readinessScore": 20,
+      "hasBlockingExceptions": true,
       "createdAt": "2026-10-01T00:00:00Z",
-      "updatedAt": "2026-10-01T00:00:00Z"
+      "updatedAt": "2026-10-20T11:34:33.130Z",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN"
     },
     {
       "id": "loan-1792489257370",
@@ -366,6 +369,21 @@
       "createdAt": "2026-10-16T09:00:00Z",
       "updatedAt": "2026-10-17T10:00:00Z",
       "linkedDocumentIds": []
+    },
+    {
+      "loanId": "loan-isolated",
+      "title": "ert",
+      "description": "",
+      "source": "Closing Prior to Funding",
+      "status": "Open",
+      "ownerId": "usr-isolated",
+      "ownerName": "Tom Bradley",
+      "dueDate": "2026-12-01",
+      "linkedDocumentIds": [],
+      "id": "c-1792495958648",
+      "workspaceId": "ws-summit-202",
+      "createdAt": "2026-10-20T11:32:38.648Z",
+      "updatedAt": "2026-10-20T11:32:38.648Z"
     }
   ],
   "documents": [
@@ -497,6 +515,28 @@
           "Insurance policy expiration date is illegible in section 4"
         ]
       }
+    },
+    {
+      "loanId": "loan-isolated",
+      "filename": "dasda",
+      "originalName": "dasda",
+      "docType": "W2 Wage Statement",
+      "fileSize": 798720,
+      "mimeType": "application/pdf",
+      "status": "Review Required",
+      "uploadedById": "usr-isolated",
+      "uploadedByName": "Tom Bradley",
+      "storagePath": "/uploads/loan-isolated/dasda",
+      "extractedMetadata": {
+        "documentDate": "2026-10-20",
+        "pageCount": 1,
+        "borrowerName": "Secret Isolated Borrower",
+        "isAiExtracted": false
+      },
+      "id": "doc-1792495964177",
+      "workspaceId": "ws-summit-202",
+      "version": 1,
+      "uploadedAt": "2026-10-20T11:32:44.177Z"
     }
   ],
   "documentConditionLinks": [
@@ -665,6 +705,54 @@
       "workspaceId": "ws-apex-101",
       "createdAt": "2026-10-20T08:16:08.392Z",
       "updatedAt": "2026-10-20T08:16:08.392Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "borrowerDisplayName": "Secret Isolated Borrower",
+      "issue": "No documentation provided for condition: \"ert\"",
+      "evidence": "Condition [c-1792495958648] created on 10/20/2026 has 0 linked files.",
+      "category": "Requirement Coverage",
+      "severity": "High",
+      "severityReason": "Lenders will not issue Clear to Close without satisfying explicit loan conditions.",
+      "status": "Resolved",
+      "isAiSuggested": false,
+      "responsibleUserId": "usr-isolated",
+      "responsibleUserName": "Tom Bradley",
+      "recommendedAction": "Request document from borrower or third party for \"ert\".",
+      "id": "exc-1792495966586",
+      "workspaceId": "ws-summit-202",
+      "createdAt": "2026-10-20T11:32:46.586Z",
+      "updatedAt": "2026-10-20T11:32:57.126Z",
+      "resolutionReason": "dasd",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "resolvedAt": "2026-10-20T11:32:57.124Z",
+      "resolvedById": "usr-isolated",
+      "resolvedByName": "Tom Bradley"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "borrowerDisplayName": "Secret Isolated Borrower",
+      "issue": "No documentation provided for condition: \"ert\"",
+      "evidence": "Condition [c-1792495958648] created on 10/20/2026 has 0 linked files.",
+      "category": "Requirement Coverage",
+      "severity": "High",
+      "severityReason": "Lenders will not issue Clear to Close without satisfying explicit loan conditions.",
+      "status": "Assigned",
+      "isAiSuggested": false,
+      "responsibleUserId": "usr-isolated",
+      "responsibleUserName": "Tom Bradley",
+      "recommendedAction": "Request document from borrower or third party for \"ert\".",
+      "id": "exc-1792495983352",
+      "workspaceId": "ws-summit-202",
+      "createdAt": "2026-10-20T11:33:03.352Z",
+      "updatedAt": "2026-10-20T11:34:33.126Z",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN"
     }
   ],
   "tasks": [
@@ -763,6 +851,158 @@
     }
   ],
   "activityLogs": [
+    {
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "FORM_CREATED",
+      "entityType": "SETTINGS",
+      "entityId": "form-1792496093873",
+      "details": "Created custom intake form: \"Borrower Pre-Approval Intake\" (Notification email: t.bradley@summitcoast.com)",
+      "id": "act-1792496093876-420",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:34:53.876Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "EXCEPTION_UPDATED",
+      "entityType": "EXCEPTION",
+      "entityId": "exc-1792495983352",
+      "details": "Updated exception status to Assigned / Assigned to Tom Bradley",
+      "id": "act-1792496073134-240",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:34:33.134Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-isolated",
+      "details": "Stage updated from Blocked to Ready for Broker Review",
+      "id": "act-1792496020505-483",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:33:40.505Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-isolated",
+      "details": "Stage updated from Setup to In Progress",
+      "id": "act-1792496019957-891",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:33:39.957Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-isolated",
+      "details": "Stage updated from Blocked to Setup",
+      "id": "act-1792496019271-631",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:33:39.271Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-isolated",
+      "details": "Stage updated from Setup to In Progress",
+      "id": "act-1792496018276-807",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:33:38.276Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "READINESS_CHECK_EXECUTED",
+      "entityType": "LOAN",
+      "entityId": "loan-isolated",
+      "details": "Executed File Readiness Check: Score 22%, 1 findings, 1 exceptions synced.",
+      "id": "act-1792495983358-357",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:33:03.358Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "EXCEPTION_RESOLVED",
+      "entityType": "EXCEPTION",
+      "entityId": "exc-1792495966586",
+      "details": "Resolved exception: \"No documentation provided for condition: \"ert\"\" (dasd)",
+      "id": "act-1792495977132-11",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:32:57.132Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "READINESS_CHECK_EXECUTED",
+      "entityType": "LOAN",
+      "entityId": "loan-isolated",
+      "details": "Executed File Readiness Check: Score 22%, 1 findings, 1 exceptions synced.",
+      "id": "act-1792495966592-631",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:32:46.592Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "DOCUMENT_UPLOADED",
+      "entityType": "DOCUMENT",
+      "entityId": "doc-1792495964177",
+      "details": "Uploaded W2 Wage Statement (dasda) - awaiting human review",
+      "id": "act-1792495964183-180",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:32:44.183Z"
+    },
+    {
+      "loanId": "loan-isolated",
+      "loanNumber": "SUMMIT-109",
+      "actorId": "usr-isolated",
+      "actorName": "Tom Bradley",
+      "actorRole": "ADMIN",
+      "action": "CONDITION_ADDED",
+      "entityType": "CONDITION",
+      "entityId": "c-1792495958648",
+      "details": "Added requirement condition: \"ert\" (Closing Prior to Funding)",
+      "id": "act-1792495958658-642",
+      "workspaceId": "ws-summit-202",
+      "timestamp": "2026-10-20T11:32:38.658Z"
+    },
     {
       "loanId": "loan-1792495078879",
       "loanNumber": "ML-2026-722",
@@ -1165,6 +1405,110 @@
       "submissionsCount": 0,
       "createdAt": "2026-10-20T09:40:47.393Z",
       "updatedAt": "2026-10-20T09:40:47.393Z"
+    },
+    {
+      "title": "Borrower Pre-Approval Intake",
+      "slug": "intake-1792496088435",
+      "description": "Fill out this quick financing intake form. Our loan officers will evaluate your file.",
+      "notificationEmail": "t.bradley@summitcoast.com",
+      "status": "Published",
+      "fields": [
+        {
+          "id": "f-head-1",
+          "type": "heading",
+          "label": "Applicant Contact Details",
+          "required": false,
+          "width": "full"
+        },
+        {
+          "id": "f-name",
+          "type": "text",
+          "label": "Full Legal Name(s)",
+          "placeholder": "e.g. Robert & Megan Davis",
+          "required": true,
+          "width": "half"
+        },
+        {
+          "id": "f-email",
+          "type": "email",
+          "label": "Email Address",
+          "placeholder": "robert@example.com",
+          "required": true,
+          "width": "half"
+        },
+        {
+          "id": "f-phone",
+          "type": "tel",
+          "label": "Phone Number",
+          "placeholder": "(512) 555-0199",
+          "required": true,
+          "width": "half"
+        },
+        {
+          "id": "f-date",
+          "type": "date",
+          "label": "Target Closing Date",
+          "required": false,
+          "width": "half"
+        },
+        {
+          "id": "f-divider-1",
+          "type": "divider",
+          "label": "Divider",
+          "required": false,
+          "width": "full"
+        },
+        {
+          "id": "f-head-2",
+          "type": "heading",
+          "label": "Loan Program & Financing Goal",
+          "required": false,
+          "width": "full"
+        },
+        {
+          "id": "f-program",
+          "type": "select",
+          "label": "Financing Goal & Loan Program",
+          "required": true,
+          "width": "half",
+          "options": [
+            "Conventional 30-Year Purchase",
+            "FHA 30-Year Loan",
+            "VA Zero Down Loan",
+            "Rate & Term Refinance",
+            "Cash-Out Refinance"
+          ]
+        },
+        {
+          "id": "f-amount",
+          "type": "number",
+          "label": "Estimated Loan Amount ($)",
+          "placeholder": "540000",
+          "required": true,
+          "width": "half"
+        },
+        {
+          "id": "f-address",
+          "type": "text",
+          "label": "Subject Property Address",
+          "placeholder": "742 Evergreen Terrace, Austin TX",
+          "required": false,
+          "width": "full"
+        },
+        {
+          "id": "f-notes",
+          "type": "textarea",
+          "label": "Special Instructions / Comments",
+          "placeholder": "Any specific requests...",
+          "required": false,
+          "width": "full"
+        }
+      ],
+      "id": "form-1792496093873",
+      "workspaceId": "ws-summit-202",
+      "submissionsCount": 0,
+      "createdAt": "2026-10-20T11:34:53.873Z",
+      "updatedAt": "2026-10-20T11:34:53.873Z"
     }
   ],
   "formSubmissions": [
