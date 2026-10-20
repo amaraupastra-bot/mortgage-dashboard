@@ -145,17 +145,6 @@ export function Header({
           )}
         </div>
 
-        {/* Borrower Intake Link */}
-        <Link
-          href="/apply"
-          target="_blank"
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition"
-          title="Open Public Borrower Intake Form"
-        >
-          <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
-          <span>Borrower Portal</span>
-        </Link>
-
         {/* New Loan Action Button */}
         <button
           onClick={onOpenNewLoanModal}

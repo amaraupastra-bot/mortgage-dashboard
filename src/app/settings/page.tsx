@@ -292,6 +292,67 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Section 4: Website Embed & Borrower Intake Widget */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+            <Building2 className="w-4 h-4 text-blue-600" />
+            <h3 className="font-bold text-sm text-slate-900">Website Embed & Borrower Lead Intake Widget</h3>
+          </div>
+
+          <p className="text-xs text-slate-600">
+            Embed this form directly onto your brokerage website (WordPress, Webflow, Squarespace, or custom site). When clients fill it out on your website, it automatically creates the loan file in your MortgageLevels dashboard under the <strong>Setup</strong> stage.
+          </p>
+
+          <div className="space-y-3 text-xs">
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">Direct Client Application URL</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value="http://localhost:3000/apply"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-800 font-mono text-xs select-all outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText('http://localhost:3000/apply');
+                    alert('Copied direct intake link to clipboard!');
+                  }}
+                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg border border-slate-200 shrink-0 transition"
+                >
+                  Copy Link
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 mb-1">Website Embed Code (iFrame / HTML Widget)</label>
+              <div className="relative">
+                <textarea
+                  readOnly
+                  rows={2}
+                  value='<iframe src="http://localhost:3000/apply" width="100%" height="750" frameborder="0" style="border:none; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05);"></iframe>'
+                  className="w-full p-3 border border-slate-300 rounded-lg bg-slate-900 text-emerald-400 font-mono text-[11px] select-all outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText('<iframe src="http://localhost:3000/apply" width="100%" height="750" frameborder="0" style="border:none; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05);"></iframe>');
+                    alert('Copied website embed code to clipboard!');
+                  }}
+                  className="mt-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-xs transition"
+                >
+                  Copy Embed Code
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1">
+                Paste this HTML snippet into any page on your website to allow borrowers to submit their loan files directly into your dashboard.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Save Bar */}
         {isAdmin && (
           <div className="flex justify-end pt-2">
