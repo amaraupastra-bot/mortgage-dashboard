@@ -182,46 +182,96 @@ function FormViewerContent({ params }: { params: Promise<{ id: string }> }) {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-            {form.fields.map((field) => (
-              <div key={field.id}>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  {field.label} {field.required && <span className="text-red-500">*</span>}
-                </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {form.fields.map((field) => {
+                const isFull = field.width === 'full' || field.type === 'heading' || field.type === 'divider' || field.type === 'textarea';
 
-                {field.type === 'select' ? (
-                  <select
-                    value={formData[field.id] || ''}
-                    onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
-                    required={field.required}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white outline-none focus:border-blue-600 text-slate-900 font-medium"
-                  >
-                    {field.options?.map((opt, i) => (
-                      <option key={i} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                ) : field.type === 'textarea' ? (
-                  <textarea
-                    rows={3}
-                    placeholder={field.placeholder || ''}
-                    value={formData[field.id] || ''}
-                    onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
-                    required={field.required}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-600 text-slate-900 font-medium"
-                  />
-                ) : (
-                  <input
-                    type={field.type}
-                    placeholder={field.placeholder || ''}
-                    value={formData[field.id] || ''}
-                    onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
-                    required={field.required}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-600 text-slate-900 font-medium"
-                  />
-                )}
-              </div>
-            ))}
+                if (field.type === 'heading') {
+                  return (
+                    <div key={field.id} className="sm:col-span-2 pt-2">
+                      <h3 className="text-base font-bold text-slate-900">{field.label}</h3>
+                      {field.helpText && <p className="text-xs text-slate-500 mt-0.5">{field.helpText}</p>}
+                    </div>
+                  );
+                }
+
+                if (field.type === 'divider') {
+                  return (
+                    <div key={field.id} className="sm:col-span-2 py-1">
+                      <hr className="border-slate-200" />
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={field.id} className={isFull ? 'sm:col-span-2' : 'sm:col-span-1'}>
+                    <label className="block font-semibold text-slate-700 mb-1">
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </label>
+
+                    {field.helpText && <p className="text-[11px] text-slate-400 mb-1">{field.helpText}</p>}
+
+                    {field.type === 'select' ? (
+                      <select
+                        value={formData[field.id] || ''}
+                        onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
+                        required={field.required}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white outline-none focus:border-blue-600 text-slate-900 font-medium"
+                      >
+                        <option value="">Select an option...</option>
+                        {field.options?.map((opt, i) => (
+                          <option key={i} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    ) : field.type === 'radio' ? (
+                      <div className="space-y-1.5 pt-0.5">
+                        {field.options?.map((opt, i) => (
+                          <label
+                            key={i}
+                            className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition text-xs ${
+                              formData[field.id] === opt
+                                ? 'border-blue-600 bg-blue-50/50 text-blue-900 font-semibold'
+                                : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-white'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={field.id}
+                              value={opt}
+                              checked={formData[field.id] === opt}
+                              onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
+                              required={field.required}
+                              className="text-blue-600"
+                            />
+                            <span>{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    ) : field.type === 'textarea' ? (
+                      <textarea
+                        rows={3}
+                        placeholder={field.placeholder || ''}
+                        value={formData[field.id] || ''}
+                        onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
+                        required={field.required}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-600 text-slate-900 font-medium"
+                      />
+                    ) : (
+                      <input
+                        type={field.type}
+                        placeholder={field.placeholder || ''}
+                        value={formData[field.id] || ''}
+                        onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
+                        required={field.required}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:border-blue-600 text-slate-900 font-medium"
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
 
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-[11px] flex items-center gap-2">
               <Lock className="w-4 h-4 text-blue-600 shrink-0" />
@@ -232,10 +282,19 @@ function FormViewerContent({ params }: { params: Promise<{ id: string }> }) {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-xs transition flex items-center justify-center gap-2 disabled:opacity-50"
+                style={{ backgroundColor: form.theme?.primaryColor || '#2563eb' }}
+                className={`w-full text-white font-semibold shadow-xs transition flex items-center justify-center gap-2 disabled:opacity-50 hover:brightness-95 ${
+                  form.theme?.buttonRadius || 'rounded-xl'
+                } ${
+                  form.theme?.buttonSize === 'sm'
+                    ? 'py-2 px-3 text-xs'
+                    : form.theme?.buttonSize === 'lg'
+                    ? 'py-3.5 px-6 text-sm'
+                    : 'py-2.5 px-4 text-xs'
+                }`}
               >
                 <Send className="w-4 h-4" />
-                {submitting ? 'Submitting...' : 'Submit Form'}
+                {submitting ? 'Submitting...' : form.theme?.buttonText || 'Submit Form'}
               </button>
             </div>
           </form>

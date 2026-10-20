@@ -189,6 +189,48 @@
       "hasBlockingExceptions": false,
       "createdAt": "2026-10-01T00:00:00Z",
       "updatedAt": "2026-10-01T00:00:00Z"
+    },
+    {
+      "id": "loan-1792489257370",
+      "workspaceId": "ws-apex-101",
+      "loanNumber": "ML-2026-813",
+      "borrowerDisplayName": "Ahmad Khan",
+      "loanOfficerId": "usr-2",
+      "loanOfficerName": "David Miller",
+      "processorId": "usr-3",
+      "processorName": "Elena Ramos",
+      "stage": "Setup",
+      "loanAmount": 520000,
+      "propertyAddress": "1904 Lakeview Terrace, Austin, TX",
+      "propertyType": "Single Family Residence",
+      "targetClosingDate": "2026-11-19",
+      "lenderName": "TBD Wholesale Underwriting",
+      "loanProgram": "Conventional 30-Year Fixed (Purchase)",
+      "readinessScore": 40,
+      "hasBlockingExceptions": false,
+      "createdAt": "2026-10-20T09:40:57.370Z",
+      "updatedAt": "2026-10-20T09:40:57.370Z"
+    },
+    {
+      "id": "loan-1792495078879",
+      "workspaceId": "ws-apex-101",
+      "loanNumber": "ML-2026-722",
+      "borrowerDisplayName": "ali",
+      "loanOfficerId": "usr-2",
+      "loanOfficerName": "David Miller",
+      "processorId": "usr-3",
+      "processorName": "Elena Ramos",
+      "stage": "Setup",
+      "loanAmount": 20,
+      "propertyAddress": "Address pending verification",
+      "propertyType": "Single Family Residence",
+      "targetClosingDate": "2026-11-19",
+      "lenderName": "TBD Wholesale Underwriting",
+      "loanProgram": "Conventional 30-Year Fixed (Purchase)",
+      "readinessScore": 90,
+      "hasBlockingExceptions": false,
+      "createdAt": "2026-10-20T11:17:58.879Z",
+      "updatedAt": "2026-10-20T11:18:47.440Z"
     }
   ],
   "conditions": [
@@ -722,6 +764,56 @@
   ],
   "activityLogs": [
     {
+      "loanId": "loan-1792495078879",
+      "loanNumber": "ML-2026-722",
+      "actorId": "usr-1",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "ADMIN",
+      "action": "READINESS_CHECK_EXECUTED",
+      "entityType": "LOAN",
+      "entityId": "loan-1792495078879",
+      "details": "Executed File Readiness Check: Score 80%, 0 findings, 0 exceptions synced.",
+      "id": "act-1792495127443-700",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T11:18:47.443Z"
+    },
+    {
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "action": "FORM_UPDATED",
+      "entityType": "SETTINGS",
+      "entityId": "form-intake-1",
+      "details": "Updated form \"Mortgage Pre-Approval & Refinance Intake\" (Status: Published, Alert Email: operations@apexlending.com)",
+      "id": "act-1792489873015-779",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T09:51:13.015Z"
+    },
+    {
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "action": "FORM_UPDATED",
+      "entityType": "SETTINGS",
+      "entityId": "form-intake-1",
+      "details": "Updated form \"Mortgage Pre-Approval & Refinance Intake\" (Status: Published, Alert Email: operations@apexlending.com)",
+      "id": "act-1792489870684-234",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T09:51:10.684Z"
+    },
+    {
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "action": "FORM_CREATED",
+      "entityType": "SETTINGS",
+      "entityId": "form-1792489247393",
+      "details": "Created custom intake form: \"New Borrower Intake Form\" (Notification email: d.miller@apexlending.com)",
+      "id": "act-1792489247396-465",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T09:40:47.396Z"
+    },
+    {
       "loanId": "loan-3",
       "loanNumber": "ML-2026-883",
       "actorId": "usr-2",
@@ -929,9 +1021,9 @@
       "description": "Collect borrower financing requirements and property details for instant readiness review.",
       "notificationEmail": "operations@apexlending.com",
       "status": "Published",
-      "submissionsCount": 2,
+      "submissionsCount": 4,
       "createdAt": "2026-10-10T10:00:00Z",
-      "updatedAt": "2026-10-18T12:00:00Z",
+      "updatedAt": "2026-10-20T11:17:58.879Z",
       "fields": [
         {
           "id": "f-1",
@@ -1001,8 +1093,128 @@
           "placeholder": "Any additional details...",
           "required": false
         }
-      ]
+      ],
+      "theme": {
+        "primaryColor": "#2563eb",
+        "buttonText": "Submit Loan Request",
+        "buttonSize": "md",
+        "buttonRadius": "rounded-xl",
+        "cardStyle": "bordered"
+      },
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER"
+    },
+    {
+      "title": "New Borrower Intake Form",
+      "slug": "intake-1792489235256",
+      "description": "Quick financing inquiry and pre-qualification checklist.",
+      "notificationEmail": "d.miller@apexlending.com",
+      "status": "Draft",
+      "fields": [
+        {
+          "id": "f-1792489235256-1",
+          "type": "text",
+          "label": "Full Legal Name",
+          "placeholder": "e.g. John Doe",
+          "required": true
+        },
+        {
+          "id": "f-1792489235256-2",
+          "type": "email",
+          "label": "Email Address",
+          "placeholder": "john@example.com",
+          "required": true
+        },
+        {
+          "id": "f-1792489235256-3",
+          "type": "tel",
+          "label": "Phone Number",
+          "placeholder": "(555) 000-0000",
+          "required": true
+        },
+        {
+          "id": "f-1792489235256-4",
+          "type": "select",
+          "label": "Financing Goal",
+          "required": true,
+          "options": [
+            "Home Purchase",
+            "Refinance Rate & Term",
+            "Cash-Out Refinance",
+            "VA Benefit Loan"
+          ]
+        },
+        {
+          "id": "f-1792489235256-5",
+          "type": "number",
+          "label": "Estimated Loan Amount ($)",
+          "placeholder": "400000",
+          "required": true
+        },
+        {
+          "id": "f-1792489240377",
+          "type": "text",
+          "label": "New Question",
+          "placeholder": "Enter response...",
+          "required": false
+        }
+      ],
+      "id": "form-1792489247393",
+      "workspaceId": "ws-apex-101",
+      "submissionsCount": 0,
+      "createdAt": "2026-10-20T09:40:47.393Z",
+      "updatedAt": "2026-10-20T09:40:47.393Z"
     }
   ],
-  "formSubmissions": []
+  "formSubmissions": [
+    {
+      "id": "sub-1792489257370",
+      "formId": "form-intake-1",
+      "workspaceId": "ws-apex-101",
+      "loanId": "loan-1792489257370",
+      "borrowerName": "Ahmad Khan",
+      "borrowerEmail": "ahmad.khan@client.com",
+      "borrowerPhone": "(555) 888-9999",
+      "loanAmount": 520000,
+      "data": {
+        "fullName": "Ahmad Khan",
+        "email": "ahmad.khan@client.com",
+        "phone": "(555) 888-9999",
+        "loanAmount": 520000,
+        "loanPurpose": "Conventional 30-Year Fixed (Purchase)",
+        "propertyAddress": "1904 Lakeview Terrace, Austin, TX"
+      },
+      "submittedAt": "2026-10-20T09:40:57.370Z",
+      "notificationSentTo": "operations@apexlending.com"
+    },
+    {
+      "id": "sub-1792495078879",
+      "formId": "form-intake-1",
+      "workspaceId": "ws-apex-101",
+      "loanId": "loan-1792495078879",
+      "borrowerName": "ali",
+      "borrowerEmail": "ali@gmail.com",
+      "borrowerPhone": "123456789",
+      "loanAmount": 20,
+      "data": {
+        "f-1": "ali",
+        "fullName": "ali",
+        "f-2": "ali@gmail.com",
+        "email": "ali@gmail.com",
+        "propertyAddress": "",
+        "f-3": "123456789",
+        "phone": "123456789",
+        "f-4": "Conventional 30-Year Fixed (Purchase)",
+        "loanPurpose": "Conventional 30-Year Fixed (Purchase)",
+        "f-5": "20",
+        "loanAmount": "20",
+        "f-6": "",
+        "f-7": "Excellent (740+)",
+        "f-8": ""
+      },
+      "submittedAt": "2026-10-20T11:17:58.879Z",
+      "notificationSentTo": "operations@apexlending.com"
+    }
+  ]
 }

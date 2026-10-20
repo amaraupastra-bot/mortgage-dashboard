@@ -232,12 +232,22 @@ export interface SystemSettings {
 }
 export interface FormField {
   id: string;
-  type: 'text' | 'email' | 'tel' | 'number' | 'select' | 'textarea' | 'date';
+  type: 'text' | 'textarea' | 'email' | 'tel' | 'number' | 'select' | 'radio' | 'date' | 'heading' | 'divider';
   label: string;
   placeholder?: string;
-  required: boolean;
-  options?: string[]; // for select
   helpText?: string;
+  required: boolean;
+  width?: 'full' | 'half';
+  options?: string[];
+  defaultValue?: string;
+}
+
+export interface FormTheme {
+  primaryColor: string;
+  buttonText: string;
+  buttonSize: 'sm' | 'md' | 'lg';
+  buttonRadius: 'rounded-md' | 'rounded-lg' | 'rounded-xl' | 'rounded-full';
+  cardStyle: 'bordered' | 'shadow' | 'flat';
 }
 
 export interface CustomForm {
@@ -248,6 +258,7 @@ export interface CustomForm {
   description: string;
   notificationEmail: string; // The email where submissions & alerts are sent
   status: 'Published' | 'Draft';
+  theme?: FormTheme;
   fields: FormField[];
   submissionsCount: number;
   createdAt: string;
