@@ -41,6 +41,7 @@ import {
   Save,
   Sliders,
   Check,
+  Upload,
 } from 'lucide-react';
 
 const defaultTheme: FormTheme = {
@@ -49,6 +50,7 @@ const defaultTheme: FormTheme = {
   buttonSize: 'md',
   buttonRadius: 'rounded-xl',
   cardStyle: 'bordered',
+  fontFamily: 'Inter',
 };
 
 // Available components in Fillout-style palette
@@ -63,6 +65,8 @@ const componentPalette = [
   { type: 'date', label: 'Date Picker', icon: Calendar, description: 'Target closing or move-in date' },
   { type: 'heading', label: 'Section Header', icon: Heading, description: 'Section divider with title' },
   { type: 'divider', label: 'Divider Line', icon: Minus, description: 'Clean separator line' },
+  { type: 'file', label: 'File Upload', icon: Upload, description: 'Attach W-2, paystub, or photo ID' },
+  { type: 'checkbox', label: 'Consent Checkbox', icon: CheckSquare, description: 'Single confirmation or consent check' },
 ];
 
 const colorOptions = [
@@ -637,6 +641,18 @@ function FormsContent() {
 
             {/* The Live Form Sheet */}
             <div
+              style={{
+                fontFamily:
+                  currentTheme.fontFamily === 'Merriweather'
+                    ? 'Georgia, Merriweather, serif'
+                    : currentTheme.fontFamily === 'Playfair'
+                    ? '"Playfair Display", Georgia, serif'
+                    : currentTheme.fontFamily === 'Poppins'
+                    ? 'Poppins, system-ui, sans-serif'
+                    : currentTheme.fontFamily === 'Roboto'
+                    ? 'Roboto, system-ui, sans-serif'
+                    : 'inherit',
+              }}
               className={`w-full max-w-xl bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-5 transition-all`}
             >
               {/* Form Title & Description on Canvas */}
@@ -757,6 +773,18 @@ function FormsContent() {
                             {field.type === 'textarea' ? (
                               <div className="p-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-400 text-xs">
                                 {field.placeholder || 'Long paragraph text area...'}
+                              </div>
+                            ) : field.type === 'file' ? (
+                              <div className="p-3 border border-dashed border-slate-300 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center gap-2">
+                                <Upload className="w-4 h-4 text-slate-400" />
+                                <span>{field.placeholder || 'Browse or drop document (PDF/Image)'}</span>
+                              </div>
+                            ) : field.type === 'checkbox' ? (
+                              <div className="flex items-center gap-2 pt-1">
+                                <input type="checkbox" disabled className="w-4 h-4 rounded text-blue-600" />
+                                <span className="text-slate-700 font-medium">
+                                  {field.placeholder || 'I acknowledge and agree to financing inquiry terms.'}
+                                </span>
                               </div>
                             ) : field.type === 'select' ? (
                               <div className="p-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-600 text-xs flex items-center justify-between">
@@ -1078,6 +1106,37 @@ function FormsContent() {
                       </button>
                     ))}
                   </div>
+
+                  {/* Custom Hex Color Picker */}
+                  <div className="mt-2.5 p-2 bg-slate-50 border border-slate-200 rounded-lg flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={currentTheme.primaryColor.startsWith('#') && currentTheme.primaryColor.length === 7 ? currentTheme.primaryColor : '#2563eb'}
+                      onChange={(e) =>
+                        setCurrentForm({
+                          ...currentForm,
+                          theme: { ...currentTheme, primaryColor: e.target.value },
+                        })
+                      }
+                      className="w-8 h-8 rounded-lg border border-slate-300 cursor-pointer p-0.5 bg-white shrink-0"
+                      title="Click to pick any custom color"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] font-semibold text-slate-500 uppercase">Custom Color (HEX)</div>
+                      <input
+                        type="text"
+                        value={currentTheme.primaryColor}
+                        onChange={(e) =>
+                          setCurrentForm({
+                            ...currentForm,
+                            theme: { ...currentTheme, primaryColor: e.target.value },
+                          })
+                        }
+                        placeholder="#2563eb"
+                        className="w-full text-xs font-mono font-bold text-slate-900 bg-transparent outline-none uppercase"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -1128,6 +1187,27 @@ function FormsContent() {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Typography / Font Style Picker */}
+                <div className="pt-2 border-t border-slate-100">
+                  <label className="block font-semibold text-slate-700 mb-1">Form Typography / Font Style</label>
+                  <select
+                    value={currentTheme.fontFamily || 'Inter'}
+                    onChange={(e) =>
+                      setCurrentForm({
+                        ...currentForm,
+                        theme: { ...currentTheme, fontFamily: e.target.value as any },
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white outline-none font-medium text-slate-900 text-xs"
+                  >
+                    <option value="Inter">Inter (Clean Modern Sans)</option>
+                    <option value="Poppins">Poppins (Geometric Display)</option>
+                    <option value="Merriweather">Merriweather (Trustworthy Editorial Serif)</option>
+                    <option value="Roboto">Roboto (Conforming Standard)</option>
+                    <option value="Playfair">Playfair Display (Luxury Serif)</option>
+                  </select>
                 </div>
               </div>
             ) : (

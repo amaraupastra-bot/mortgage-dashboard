@@ -175,7 +175,21 @@ function FormViewerContent({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+        <div
+          style={{
+            fontFamily:
+              form.theme?.fontFamily === 'Merriweather'
+                ? 'Georgia, Merriweather, serif'
+                : form.theme?.fontFamily === 'Playfair'
+                ? '"Playfair Display", Georgia, serif'
+                : form.theme?.fontFamily === 'Poppins'
+                ? 'Poppins, system-ui, sans-serif'
+                : form.theme?.fontFamily === 'Roboto'
+                ? 'Roboto, system-ui, sans-serif'
+                : 'inherit',
+          }}
+          className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6"
+        >
           <div>
             <h1 className="text-xl font-bold text-slate-900">{form.title}</h1>
             {form.description && <p className="text-xs text-slate-500 mt-1">{form.description}</p>}
@@ -249,6 +263,28 @@ function FormViewerContent({ params }: { params: Promise<{ id: string }> }) {
                           </label>
                         ))}
                       </div>
+                    ) : field.type === 'file' ? (
+                      <div className="space-y-1">
+                        <input
+                          type="file"
+                          onChange={(e) => setFormData({ ...formData, [field.id]: e.target.files?.[0]?.name || '' })}
+                          required={field.required}
+                          className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-slate-300 rounded-lg p-1 bg-white"
+                        />
+                      </div>
+                    ) : field.type === 'checkbox' ? (
+                      <label className="flex items-center gap-2.5 pt-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(formData[field.id])}
+                          onChange={(e) => setFormData({ ...formData, [field.id]: e.target.checked })}
+                          required={field.required}
+                          className="w-4 h-4 rounded text-blue-600 cursor-pointer"
+                        />
+                        <span className="text-xs text-slate-700 font-medium">
+                          {field.placeholder || field.label} {field.required && <span className="text-red-500">*</span>}
+                        </span>
+                      </label>
                     ) : field.type === 'textarea' ? (
                       <textarea
                         rows={3}

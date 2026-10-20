@@ -296,7 +296,7 @@ export interface SystemSettings {
 }
 export interface FormField {
   id: string;
-  type: 'text' | 'textarea' | 'email' | 'tel' | 'number' | 'select' | 'radio' | 'date' | 'heading' | 'divider';
+  type: 'text' | 'textarea' | 'email' | 'tel' | 'number' | 'select' | 'radio' | 'date' | 'heading' | 'divider' | 'file' | 'checkbox';
   label: string;
   placeholder?: string;
   helpText?: string;
@@ -312,6 +312,7 @@ export interface FormTheme {
   buttonSize: 'sm' | 'md' | 'lg';
   buttonRadius: 'rounded-md' | 'rounded-lg' | 'rounded-xl' | 'rounded-full';
   cardStyle: 'bordered' | 'shadow' | 'flat';
+  fontFamily?: 'Inter' | 'Poppins' | 'Merriweather' | 'Roboto' | 'Playfair';
 }
 
 export interface CustomForm {
