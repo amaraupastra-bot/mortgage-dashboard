@@ -82,7 +82,7 @@
       "readinessScore": 10,
       "hasBlockingExceptions": true,
       "createdAt": "2026-10-01T14:22:00Z",
-      "updatedAt": "2026-10-20T08:58:54.028Z"
+      "updatedAt": "2026-10-20T11:57:30.790Z"
     },
     {
       "id": "loan-2",
@@ -913,6 +913,20 @@
     }
   ],
   "activityLogs": [
+    {
+      "loanId": "loan-1",
+      "loanNumber": "ML-2026-881",
+      "actorId": "usr-1",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "ADMIN",
+      "action": "READINESS_CHECK_EXECUTED",
+      "entityType": "LOAN",
+      "entityId": "loan-1",
+      "details": "Executed File Readiness Check: Score 20%, 4 findings, 0 exceptions synced.",
+      "id": "act-1792497450794-634",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T11:57:30.794Z"
+    },
     {
       "loanId": "loan-isolated",
       "loanNumber": "SUMMIT-109",
