@@ -230,3 +230,40 @@ export interface SystemSettings {
   dataRetentionDays: number;
   emailAlertsEnabled: boolean;
 }
+export interface FormField {
+  id: string;
+  type: 'text' | 'email' | 'tel' | 'number' | 'select' | 'textarea' | 'date';
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[]; // for select
+  helpText?: string;
+}
+
+export interface CustomForm {
+  id: string;
+  workspaceId: string;
+  title: string;
+  slug: string;
+  description: string;
+  notificationEmail: string; // The email where submissions & alerts are sent
+  status: 'Published' | 'Draft';
+  fields: FormField[];
+  submissionsCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FormSubmission {
+  id: string;
+  formId: string;
+  workspaceId: string;
+  loanId?: string;
+  borrowerName: string;
+  borrowerEmail: string;
+  borrowerPhone?: string;
+  loanAmount: number;
+  data: Record<string, any>;
+  submittedAt: string;
+  notificationSentTo: string;
+}

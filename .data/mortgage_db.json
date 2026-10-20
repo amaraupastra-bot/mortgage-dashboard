@@ -124,10 +124,10 @@
       "readinessScore": 100,
       "hasBlockingExceptions": false,
       "createdAt": "2026-09-28T09:40:00Z",
-      "updatedAt": "2026-10-20T08:56:24.102Z",
-      "actorId": "usr-1",
-      "actorName": "Sarah Jenkins",
-      "actorRole": "ADMIN"
+      "updatedAt": "2026-10-20T09:29:10.963Z",
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER"
     },
     {
       "id": "loan-4",
@@ -711,12 +711,72 @@
       "assigneeName": "Sarah Jenkins",
       "dueDate": "2026-10-22",
       "priority": "Urgent",
-      "status": "To Do",
+      "status": "Completed",
       "createdAt": "2026-10-20T08:30:00Z",
-      "updatedAt": "2026-10-20T08:30:00Z"
+      "updatedAt": "2026-10-20T09:28:06.516Z",
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "completedAt": "2026-10-20T09:28:06.515Z"
     }
   ],
   "activityLogs": [
+    {
+      "loanId": "loan-3",
+      "loanNumber": "ML-2026-883",
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "action": "READINESS_CHECK_EXECUTED",
+      "entityType": "LOAN",
+      "entityId": "loan-3",
+      "details": "Executed File Readiness Check: Score 100%, 0 findings, 0 exceptions synced.",
+      "id": "act-1792488550965-389",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T09:29:10.965Z"
+    },
+    {
+      "loanId": "loan-3",
+      "loanNumber": "ML-2026-883",
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-3",
+      "details": "Stage updated from Ready for Broker Review to Setup",
+      "id": "act-1792488493809-645",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T09:28:13.809Z"
+    },
+    {
+      "loanId": "loan-3",
+      "loanNumber": "ML-2026-883",
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "action": "STAGE_UPDATED",
+      "entityType": "LOAN",
+      "entityId": "loan-3",
+      "details": "Stage updated from Ready for Broker Review to Setup",
+      "id": "act-1792488493525-796",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T09:28:13.525Z"
+    },
+    {
+      "loanId": "loan-3",
+      "loanNumber": "ML-2026-883",
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "action": "TASK_COMPLETED",
+      "entityType": "TASK",
+      "entityId": "tsk-5",
+      "details": "Completed task \"Broker final sign-off and file readiness lock\"",
+      "id": "act-1792488486519-427",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-20T09:28:06.519Z"
+    },
     {
       "loanId": "loan-1",
       "loanNumber": "ML-2026-881",
@@ -859,5 +919,90 @@
       "dataRetentionDays": 2555,
       "emailAlertsEnabled": true
     }
-  ]
+  ],
+  "forms": [
+    {
+      "id": "form-intake-1",
+      "workspaceId": "ws-apex-101",
+      "title": "Mortgage Pre-Approval & Refinance Intake",
+      "slug": "pre-approval-intake",
+      "description": "Collect borrower financing requirements and property details for instant readiness review.",
+      "notificationEmail": "operations@apexlending.com",
+      "status": "Published",
+      "submissionsCount": 2,
+      "createdAt": "2026-10-10T10:00:00Z",
+      "updatedAt": "2026-10-18T12:00:00Z",
+      "fields": [
+        {
+          "id": "f-1",
+          "type": "text",
+          "label": "Full Legal Name(s)",
+          "placeholder": "e.g. John & Jane Doe",
+          "required": true
+        },
+        {
+          "id": "f-2",
+          "type": "email",
+          "label": "Email Address",
+          "placeholder": "john@example.com",
+          "required": true
+        },
+        {
+          "id": "f-3",
+          "type": "tel",
+          "label": "Phone Number",
+          "placeholder": "(555) 123-4567",
+          "required": true
+        },
+        {
+          "id": "f-4",
+          "type": "select",
+          "label": "Loan Purpose & Program",
+          "required": true,
+          "options": [
+            "Conventional 30-Year Fixed (Purchase)",
+            "FHA 30-Year Loan",
+            "VA Loan (Veteran Benefit)",
+            "Jumbo Financing",
+            "Rate & Term Refinance",
+            "Cash-Out Refinance"
+          ]
+        },
+        {
+          "id": "f-5",
+          "type": "number",
+          "label": "Requested Loan Amount ($)",
+          "placeholder": "450000",
+          "required": true
+        },
+        {
+          "id": "f-6",
+          "type": "text",
+          "label": "Subject Property Address",
+          "placeholder": "123 Main St, Austin TX",
+          "required": false
+        },
+        {
+          "id": "f-7",
+          "type": "select",
+          "label": "Estimated Credit Score Range",
+          "required": false,
+          "options": [
+            "Excellent (740+)",
+            "Good (680 - 739)",
+            "Fair (620 - 679)",
+            "Building Credit (< 620)"
+          ]
+        },
+        {
+          "id": "f-8",
+          "type": "textarea",
+          "label": "Notes or Special Questions",
+          "placeholder": "Any additional details...",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "formSubmissions": []
 }

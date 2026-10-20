@@ -12,6 +12,9 @@ import {
   ActivityLog,
   SystemSettings,
   UserRole,
+  CustomForm,
+  FormSubmission,
+  FormField,
 } from '@/types';
 
 interface DatabaseSchema {
@@ -25,6 +28,8 @@ interface DatabaseSchema {
   tasks: Task[];
   activityLogs: ActivityLog[];
   settings: SystemSettings[];
+  forms: CustomForm[];
+  formSubmissions: FormSubmission[];
 }
 
 const DB_DIR = path.join(process.cwd(), '.data');
@@ -773,6 +778,8 @@ function getInitialData(): DatabaseSchema {
     tasks,
     activityLogs,
     settings,
+    forms: [],
+    formSubmissions: [],
   };
 }
 
@@ -790,7 +797,57 @@ function getDatabase(): DatabaseSchema {
 
   try {
     const raw = fs.readFileSync(DB_FILE, 'utf-8');
-    return JSON.parse(raw) as DatabaseSchema;
+    const parsed = JSON.parse(raw) as DatabaseSchema;
+    if (!parsed.forms) parsed.forms = [];
+    if (!parsed.formSubmissions) parsed.formSubmissions = [];
+
+    // Seed default intake form if none exist
+    if (parsed.forms.length === 0) {
+      parsed.forms.push({
+        id: 'form-intake-1',
+        workspaceId: 'ws-apex-101',
+        title: 'Mortgage Pre-Approval & Refinance Intake',
+        slug: 'pre-approval-intake',
+        description: 'Collect borrower financing requirements and property details for instant readiness review.',
+        notificationEmail: 'operations@apexlending.com',
+        status: 'Published',
+        submissionsCount: 2,
+        createdAt: '2026-10-10T10:00:00Z',
+        updatedAt: '2026-10-18T12:00:00Z',
+        fields: [
+          { id: 'f-1', type: 'text', label: 'Full Legal Name(s)', placeholder: 'e.g. John & Jane Doe', required: true },
+          { id: 'f-2', type: 'email', label: 'Email Address', placeholder: 'john@example.com', required: true },
+          { id: 'f-3', type: 'tel', label: 'Phone Number', placeholder: '(555) 123-4567', required: true },
+          {
+            id: 'f-4',
+            type: 'select',
+            label: 'Loan Purpose & Program',
+            required: true,
+            options: [
+              'Conventional 30-Year Fixed (Purchase)',
+              'FHA 30-Year Loan',
+              'VA Loan (Veteran Benefit)',
+              'Jumbo Financing',
+              'Rate & Term Refinance',
+              'Cash-Out Refinance'
+            ]
+          },
+          { id: 'f-5', type: 'number', label: 'Requested Loan Amount ($)', placeholder: '450000', required: true },
+          { id: 'f-6', type: 'text', label: 'Subject Property Address', placeholder: '123 Main St, Austin TX', required: false },
+          {
+            id: 'f-7',
+            type: 'select',
+            label: 'Estimated Credit Score Range',
+            required: false,
+            options: ['Excellent (740+)', 'Good (680 - 739)', 'Fair (620 - 679)', 'Building Credit (< 620)']
+          },
+          { id: 'f-8', type: 'textarea', label: 'Notes or Special Questions', placeholder: 'Any additional details...', required: false }
+        ]
+      });
+      saveDatabase(parsed);
+    }
+
+    return parsed;
   } catch (err) {
     console.error('Error reading database file, resetting to initial seed:', err);
     const initialData = getInitialData();
@@ -1207,4 +1264,131 @@ export function recalculateLoanReadiness(workspaceId: string, loanId: string): L
 
   saveDatabase(db);
   return db.loans[loanIdx];
+}
+
+// Custom Forms & Submissions
+export function getForms(workspaceId: string): CustomForm[] {
+  const db = getDatabase();
+  return (db.forms || []).filter((f) => f.workspaceId === workspaceId);
+}
+
+export function getFormById(workspaceId: string, id: string): CustomForm | undefined {
+  const db = getDatabase();
+  return (db.forms || []).find((f) => f.workspaceId === workspaceId && f.id === id);
+}
+
+export function getFormBySlugOrId(idOrSlug: string): CustomForm | undefined {
+  const db = getDatabase();
+  return (db.forms || []).find((f) => f.id === idOrSlug || f.slug === idOrSlug);
+}
+
+export function createCustomForm(
+  workspaceId: string,
+  data: Omit<CustomForm, 'id' | 'workspaceId' | 'submissionsCount' | 'createdAt' | 'updatedAt'>
+): CustomForm {
+  const db = getDatabase();
+  const newForm: CustomForm = {
+    ...data,
+    id: `form-${Date.now()}`,
+    workspaceId,
+    submissionsCount: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  db.forms.push(newForm);
+  saveDatabase(db);
+  return newForm;
+}
+
+export function updateCustomForm(workspaceId: string, id: string, updates: Partial<CustomForm>): CustomForm | null {
+  const db = getDatabase();
+  const idx = db.forms.findIndex((f) => f.workspaceId === workspaceId && f.id === id);
+  if (idx === -1) return null;
+  db.forms[idx] = { ...db.forms[idx], ...updates, updatedAt: new Date().toISOString() };
+  saveDatabase(db);
+  return db.forms[idx];
+}
+
+export function deleteCustomForm(workspaceId: string, id: string): boolean {
+  const db = getDatabase();
+  const prevLen = db.forms.length;
+  db.forms = db.forms.filter((f) => !(f.workspaceId === workspaceId && f.id === id));
+  saveDatabase(db);
+  return db.forms.length < prevLen;
+}
+
+export function submitCustomForm(
+  idOrSlug: string,
+  formData: Record<string, any>
+): { submission: FormSubmission; loan: Loan; form: CustomForm } | null {
+  const db = getDatabase();
+  const form = (db.forms || []).find((f) => f.id === idOrSlug || f.slug === idOrSlug);
+  if (!form) return null;
+
+  const borrowerName = formData.fullName || formData.name || formData.borrowerName || 'New Borrower Lead';
+  const borrowerEmail = formData.email || 'borrower@client.com';
+  const borrowerPhone = formData.phone || formData.tel;
+  const loanAmount = Number(formData.loanAmount || formData.amount || 400000);
+  const loanProgram = formData.loanPurpose || formData.loanProgram || 'Conventional 30-Year Fixed';
+  const propertyAddress = formData.propertyAddress || formData.address || 'Address pending verification';
+
+  // 1. Create Loan in DB
+  const loanNumber = `ML-2026-${Math.floor(100 + Math.random() * 900)}`;
+  const newLoan: Loan = {
+    id: `loan-${Date.now()}`,
+    workspaceId: form.workspaceId,
+    loanNumber,
+    borrowerDisplayName: borrowerName,
+    loanOfficerId: 'usr-2',
+    loanOfficerName: 'David Miller',
+    processorId: 'usr-3',
+    processorName: 'Elena Ramos',
+    stage: 'Setup',
+    loanAmount,
+    propertyAddress,
+    propertyType: formData.propertyType || 'Single Family Residence',
+    targetClosingDate: formData.targetClosingDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+    lenderName: 'TBD Wholesale Underwriting',
+    loanProgram,
+    readinessScore: 40,
+    hasBlockingExceptions: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  db.loans.push(newLoan);
+
+  // 2. Increment submission count & create record
+  form.submissionsCount = (form.submissionsCount || 0) + 1;
+  form.updatedAt = new Date().toISOString();
+
+  const submission: FormSubmission = {
+    id: `sub-${Date.now()}`,
+    formId: form.id,
+    workspaceId: form.workspaceId,
+    loanId: newLoan.id,
+    borrowerName,
+    borrowerEmail,
+    borrowerPhone,
+    loanAmount,
+    data: formData,
+    submittedAt: new Date().toISOString(),
+    notificationSentTo: form.notificationEmail,
+  };
+  db.formSubmissions.push(submission);
+
+  // 3. Log audit activity
+  logActivity(form.workspaceId, {
+    loanId: newLoan.id,
+    loanNumber: newLoan.loanNumber,
+    actorId: 'usr-form-intake',
+    actorName: `${borrowerName} (Online Form Lead)`,
+    actorRole: 'PROCESSOR',
+    action: 'LOAN_CREATED',
+    entityType: 'LOAN',
+    entityId: newLoan.id,
+    details: `Form submission via "${form.title}" -> Created loan ${newLoan.loanNumber}. Notification emailed to ${form.notificationEmail}`,
+  });
+
+  saveDatabase(db);
+  return { submission, loan: newLoan, form };
 }

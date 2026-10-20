@@ -18,6 +18,7 @@ import {
   Building2,
   ChevronRight,
   ExternalLink,
+  FormInput,
 } from 'lucide-react';
 
 interface NavItem {
@@ -34,6 +35,7 @@ const navItems: NavItem[] = [
   { name: 'Exceptions', href: '/exceptions', icon: AlertOctagon, badge: 'Radar', badgeColor: 'bg-red-500 text-white' },
   { name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { name: 'Documents', href: '/documents', icon: FileText },
+  { name: 'Forms', href: '/forms', icon: FormInput, badge: 'Builder', badgeColor: 'bg-indigo-600 text-white' },
   { name: 'Reports', href: '/reports', icon: BarChart3 },
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Settings', href: '/settings', icon: Settings },
