@@ -95,7 +95,7 @@ export function runLoanReadinessChecks(
       const due = new Date(cond.dueDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      if (due < today && cond.status !== 'Resolved') {
+      if (due < today) {
         const daysOver = Math.floor((today.getTime() - due.getTime()) / (1000 * 60 * 60 * 24));
         findings.push({
           issue: `Condition "${cond.title}" is ${daysOver} day(s) past due`,

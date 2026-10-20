@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useTransition } from 'react';
+import React, { useEffect, useState, useCallback, useTransition, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -24,7 +24,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-export default function LoansPage() {
+function LoansContent() {
   const searchParams = useSearchParams();
   const initialStage = searchParams.get('stage') || 'all';
   const initialBlockers = searchParams.get('hasBlockers') === 'true';
@@ -384,5 +384,13 @@ export default function LoansPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function LoansPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading loan pipeline...</div>}>
+      <LoansContent />
+    </Suspense>
   );
 }

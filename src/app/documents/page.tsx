@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -22,7 +22,7 @@ import {
   X,
 } from 'lucide-react';
 
-export default function DocumentsPage() {
+function DocumentsContent() {
   const searchParams = useSearchParams();
   const initialStatus = searchParams.get('status') || 'all';
 
@@ -340,5 +340,13 @@ export default function DocumentsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function DocumentsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading documents...</div>}>
+      <DocumentsContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, use } from 'react';
+import React, { useEffect, useState, useCallback, use, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -49,7 +49,7 @@ import {
   X,
 } from 'lucide-react';
 
-export default function LoanWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
+function LoanWorkspaceContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('tab') || 'overview';
@@ -1634,5 +1634,13 @@ export default function LoanWorkspacePage({ params }: { params: Promise<{ id: st
         </div>
       )}
     </div>
+  );
+}
+
+export default function LoanWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading loan workspace...</div>}>
+      <LoanWorkspaceContent params={params} />
+    </Suspense>
   );
 }

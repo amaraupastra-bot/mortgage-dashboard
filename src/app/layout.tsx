@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { AuthProvider } from '@/context/AuthContext';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
@@ -27,14 +27,22 @@ export default function RootLayout({
       <body className="bg-slate-50 text-slate-900 antialiased min-h-screen">
         <AuthProvider>
           <div className="flex min-h-screen">
-            <Sidebar mobileOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
+            <Suspense fallback={<aside className="hidden lg:block w-64 bg-[#0a1424] h-screen shrink-0" />}>
+              <Sidebar mobileOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
+            </Suspense>
+
             <div className="flex-1 flex flex-col min-w-0">
-              <Header
-                onOpenMobileNav={() => setMobileNavOpen(true)}
-                onOpenNewLoanModal={() => setNewLoanModalOpen(true)}
-              />
+              <Suspense fallback={<header className="h-16 bg-white border-b border-slate-200" />}>
+                <Header
+                  onOpenMobileNav={() => setMobileNavOpen(true)}
+                  onOpenNewLoanModal={() => setNewLoanModalOpen(true)}
+                />
+              </Suspense>
+
               <main className="flex-1 p-4 lg:p-8 max-w-7xl w-full mx-auto">
-                {children}
+                <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading mortgage workspace...</div>}>
+                  {children}
+                </Suspense>
               </main>
             </div>
           </div>
