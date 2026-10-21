@@ -65,15 +65,15 @@ const navItems: NavItem[] = [
     icon: FileText,
     roles: ['ADMIN', 'LOAN_OFFICER', 'PROCESSOR'],
   },
-  // Admin-Only Workflow Sections
   {
     name: 'Forms',
     href: '/forms',
     icon: FormInput,
-    badge: 'Admin',
+    badge: 'Builder',
     badgeColor: 'bg-indigo-600 text-white',
-    roles: ['ADMIN'],
+    roles: ['ADMIN', 'LOAN_OFFICER', 'PROCESSOR'],
   },
+  // Admin-Only Workflow Sections
   {
     name: 'Reports',
     href: '/reports',

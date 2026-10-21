@@ -923,6 +923,18 @@
   ],
   "activityLogs": [
     {
+      "actorId": "usr-1",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "ADMIN",
+      "action": "USER_UPDATED",
+      "entityType": "USER",
+      "entityId": "usr-1",
+      "details": "User signed in: Sarah Jenkins (ADMIN)",
+      "id": "act-1792560279600-54",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-21T05:24:39.600Z"
+    },
+    {
       "loanId": "loan-3",
       "loanNumber": "ML-2026-883",
       "actorId": "usr-1792559465738",
