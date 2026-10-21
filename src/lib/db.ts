@@ -1438,6 +1438,18 @@ export function submitCustomForm(
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+
+  // Populate Form 1003 (URLA) directly from the client's submitted lead form
+  const custom1003 = generateDefault1003(newLoan);
+  if (formData.email) custom1003.borrower.email = formData.email;
+  if (formData.phone || formData.tel) custom1003.borrower.phone = formData.phone || formData.tel;
+  if (formData.income || formData.monthlyIncome) {
+    const inc = Number(formData.income || formData.monthlyIncome);
+    custom1003.employment.monthlyBaseIncome = inc;
+    custom1003.employment.totalMonthlyIncome = inc;
+  }
+  newLoan.form1003 = custom1003;
+
   db.loans.push(newLoan);
 
   // 2. Increment submission count & create record

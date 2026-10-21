@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { User, UserRole } from '@/types';
 import { RoleBadge } from '@/components/ui/Badge';
@@ -150,6 +151,26 @@ export default function TeamPage() {
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   };
+
+  if (!isAdmin) {
+    return (
+      <div className="p-8 bg-white border border-slate-200 rounded-2xl text-center max-w-lg mx-auto mt-12 space-y-4 shadow-sm">
+        <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+          <Lock className="w-6 h-6" />
+        </div>
+        <h2 className="text-base font-bold text-slate-900">Administrator Access Restricted</h2>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Team member invitations, role changes, and account access controls are reserved exclusively for the Brokerage Administrator.
+        </p>
+        <Link
+          href="/"
+          className="inline-flex px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition"
+        >
+          Return to My Working Dashboard
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

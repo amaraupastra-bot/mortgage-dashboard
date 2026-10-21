@@ -12,13 +12,35 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const workspaceId = searchParams.get('workspaceId') || 'ws-apex-101';
+    const userId = searchParams.get('userId');
+    const userRole = searchParams.get('userRole');
 
-    const loans = getLoans(workspaceId);
-    const exceptions = getExceptions(workspaceId);
-    const tasks = getTasks(workspaceId);
-    const documents = getDocuments(workspaceId);
-    const activities = getActivityLogs(workspaceId, undefined, 10);
-    const users = getUsers(workspaceId);
+    let loans = getLoans(workspaceId);
+    let exceptions = getExceptions(workspaceId);
+    let tasks = getTasks(workspaceId);
+    let documents = getDocuments(workspaceId);
+    let activities = getActivityLogs(workspaceId, undefined, 10);
+    const allUsers = getUsers(workspaceId);
+
+    const isLoanOfficer = userRole === 'LOAN_OFFICER' && userId;
+    const isProcessor = userRole === 'PROCESSOR' && userId;
+
+    // Filter data specifically for Loan Officer's working files
+    if (isLoanOfficer) {
+      // Only loans assigned to this Loan Officer
+      loans = loans.filter((l) => l.loanOfficerId === userId);
+      const officerLoanIds = new Set(loans.map((l) => l.id));
+
+      exceptions = exceptions.filter((e) => officerLoanIds.has(e.loanId));
+      tasks = tasks.filter((t) => t.assigneeId === userId || officerLoanIds.has(t.loanId));
+      documents = documents.filter((d) => officerLoanIds.has(d.loanId));
+      activities = activities.filter((a) => (a.loanId && officerLoanIds.has(a.loanId)) || a.actorId === userId);
+    } else if (isProcessor) {
+      // Loan Processor focuses on active underwriting queue
+      const processorLoans = loans.filter((l) => l.processorId === userId || l.stage === 'In Progress' || l.stage === 'Setup');
+      const processorLoanIds = new Set(processorLoans.map((l) => l.id));
+      tasks = tasks.filter((t) => t.assigneeId === userId || processorLoanIds.has(t.loanId));
+    }
 
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -54,15 +76,17 @@ export async function GET(request: NextRequest) {
       (e) => e.severity === 'Urgent' || e.severity === 'High'
     );
 
-    // Team workload distribution
-    const teamWorkload = users.map((u) => {
-      const assignedLoans = loans.filter(
+    // Team workload distribution (For Admin, show all; for Loan Officer, show only their profile)
+    const workloadUsers = isLoanOfficer ? allUsers.filter((u) => u.id === userId) : allUsers;
+
+    const teamWorkload = workloadUsers.map((u) => {
+      const assignedLoans = getLoans(workspaceId).filter(
         (l) => (l.loanOfficerId === u.id || l.processorId === u.id) && l.stage !== 'Archived'
       ).length;
-      const assignedTasks = tasks.filter(
+      const assignedTasks = getTasks(workspaceId).filter(
         (t) => t.assigneeId === u.id && t.status !== 'Completed' && t.status !== 'Cancelled'
       ).length;
-      const assignedExceptions = exceptions.filter(
+      const assignedExceptions = getExceptions(workspaceId).filter(
         (e) => e.responsibleUserId === u.id && e.status !== 'Resolved' && e.status !== 'Dismissed'
       ).length;
 
@@ -76,9 +100,14 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Total dollar volume in working pipeline
+    const totalPipelineVolume = activeLoans.reduce((sum, l) => sum + (l.loanAmount || 0), 0);
+
     return NextResponse.json({
       success: true,
       data: {
+        isPersonalView: Boolean(isLoanOfficer),
+        totalPipelineVolume,
         metrics: {
           activeLoansCount: activeLoans.length,
           blockedLoansCount: blockedLoans.length,

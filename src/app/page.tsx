@@ -22,6 +22,7 @@ import {
   ExternalLink,
   RefreshCw,
   Building2,
+  Check,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -31,11 +32,16 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const isLoanOfficer = currentUser.role === 'LOAN_OFFICER';
+  const isAdmin = currentUser.role === 'ADMIN';
+
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/dashboard?workspaceId=${workspace.id}`);
+      const res = await fetch(
+        `/api/dashboard?workspaceId=${workspace.id}&userId=${currentUser.id}&userRole=${currentUser.role}`
+      );
       const json = await res.json();
       if (!json.success) {
         throw new Error(json.error || 'Failed to fetch dashboard metrics');
@@ -46,7 +52,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [workspace.id]);
+  }, [workspace.id, currentUser.id, currentUser.role]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -98,10 +104,16 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-            Pipeline Readiness Dashboard
+            {isLoanOfficer
+              ? 'Loan Officer Production Dashboard'
+              : currentUser.role === 'PROCESSOR'
+              ? 'Loan Processing Operations Dashboard'
+              : 'Pipeline Readiness Dashboard'}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Real-time mortgage file compliance, document exception tracking, and broker review queue.
+            {isLoanOfficer
+              ? `Personal origination metrics, borrower applications, and file status for ${currentUser.name}.`
+              : 'Real-time mortgage file compliance, document exception tracking, and broker review queue.'}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -123,9 +135,9 @@ export default function DashboardPage() {
       <div className="p-4 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white rounded-xl shadow-md border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
-            {currentUser.role === 'ADMIN' ? (
+            {isAdmin ? (
               <Building2 className="w-5 h-5 text-amber-300" />
-            ) : currentUser.role === 'LOAN_OFFICER' ? (
+            ) : isLoanOfficer ? (
               <User className="w-5 h-5 text-emerald-300" />
             ) : (
               <Activity className="w-5 h-5 text-purple-300" />
@@ -134,10 +146,10 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="font-bold text-sm tracking-tight text-white">
-                {currentUser.role === 'ADMIN'
+                {isAdmin
                   ? `Brokerage Owner & Admin: ${currentUser.name}`
-                  : currentUser.role === 'LOAN_OFFICER'
-                  ? `Loan Officer Production Hub: ${currentUser.name}`
+                  : isLoanOfficer
+                  ? `Loan Officer Working Space: ${currentUser.name}`
                   : `Loan Processor Operations Hub: ${currentUser.name}`}
               </h2>
               <span className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded text-white uppercase tracking-wider">
@@ -145,17 +157,17 @@ export default function DashboardPage() {
               </span>
             </div>
             <p className="text-xs text-blue-200 mt-0.5">
-              {currentUser.role === 'ADMIN'
-                ? 'Branch-wide oversight across all originators, team permissions, custom form controls, and enterprise settings.'
-                : currentUser.role === 'LOAN_OFFICER'
-                ? 'Viewing your active origination pipeline, Form 1003 applications, and borrower document completeness.'
+              {isAdmin
+                ? 'Full company oversight across all originators, team permissions, custom form controls, and enterprise settings.'
+                : isLoanOfficer
+                ? 'Showing only your assigned borrower files, Form 1003 applications, and personal file compliance items.'
                 : 'Prioritizing document review inbox, lender underwriting condition sign-offs, and file clearance.'}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {currentUser.role === 'LOAN_OFFICER' && (
+          {isLoanOfficer && (
             <Link
               href={`/loans?ownerId=${currentUser.id}`}
               className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg shadow-sm transition"
@@ -171,7 +183,7 @@ export default function DashboardPage() {
               Document Review Inbox &rarr;
             </Link>
           )}
-          {currentUser.role === 'ADMIN' && (
+          {isAdmin && (
             <Link
               href="/team"
               className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold rounded-lg transition"
@@ -182,15 +194,15 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Primary KPI Metrics (Clickable to open filtered lists) */}
+      {/* Primary KPI Metrics (Filtered dynamically to user's assigned scope) */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
         {/* Active Loans */}
         <Link
-          href="/loans"
+          href={isLoanOfficer ? `/loans?ownerId=${currentUser.id}` : '/loans'}
           className="p-4 bg-white rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition group"
         >
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-medium">Active Loans</span>
+            <span className="text-xs font-medium">{isLoanOfficer ? 'My Active Loans' : 'Active Loans'}</span>
             <FolderKanban className="w-4 h-4 text-blue-600 group-hover:scale-110 transition-transform" />
           </div>
           <div className="text-2xl font-bold text-slate-900">{m.activeLoansCount || 0}</div>
@@ -201,11 +213,11 @@ export default function DashboardPage() {
 
         {/* Blocked Loans */}
         <Link
-          href="/loans?hasBlockers=true"
+          href={isLoanOfficer ? `/loans?ownerId=${currentUser.id}&hasBlockers=true` : '/loans?hasBlockers=true'}
           className="p-4 bg-white rounded-xl border border-red-200 bg-red-50/20 hover:border-red-400 hover:shadow-md transition group"
         >
           <div className="flex items-center justify-between text-red-600 mb-2">
-            <span className="text-xs font-medium">Blocked Files</span>
+            <span className="text-xs font-medium">{isLoanOfficer ? 'My Blocked Files' : 'Blocked Files'}</span>
             <ShieldAlert className="w-4 h-4 text-red-600 group-hover:scale-110 transition-transform" />
           </div>
           <div className="text-2xl font-bold text-red-700">{m.blockedLoansCount || 0}</div>
@@ -216,11 +228,11 @@ export default function DashboardPage() {
 
         {/* Ready for Broker Review */}
         <Link
-          href="/loans?stage=Ready for Broker Review"
+          href={isLoanOfficer ? `/loans?ownerId=${currentUser.id}&stage=Ready for Broker Review` : '/loans?stage=Ready for Broker Review'}
           className="p-4 bg-white rounded-xl border border-emerald-200 bg-emerald-50/20 hover:border-emerald-400 hover:shadow-md transition group"
         >
           <div className="flex items-center justify-between text-emerald-700 mb-2">
-            <span className="text-xs font-medium">Ready for Review</span>
+            <span className="text-xs font-medium">{isLoanOfficer ? 'My Ready Files' : 'Ready for Review'}</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
           </div>
           <div className="text-2xl font-bold text-emerald-800">{m.readyForReviewCount || 0}</div>
@@ -235,7 +247,7 @@ export default function DashboardPage() {
           className="p-4 bg-white rounded-xl border border-slate-200 hover:border-amber-400 hover:shadow-md transition group"
         >
           <div className="flex items-center justify-between text-amber-700 mb-2">
-            <span className="text-xs font-medium">Review Queue</span>
+            <span className="text-xs font-medium">Doc Review Queue</span>
             <FileClock className="w-4 h-4 text-amber-600 group-hover:scale-110 transition-transform" />
           </div>
           <div className="text-2xl font-bold text-slate-900">{m.docsAwaitingReviewCount || 0}</div>
@@ -250,7 +262,7 @@ export default function DashboardPage() {
           className="p-4 bg-white rounded-xl border border-slate-200 hover:border-orange-400 hover:shadow-md transition group"
         >
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-medium">Overdue Tasks</span>
+            <span className="text-xs font-medium">{isLoanOfficer ? 'My Tasks' : 'Overdue Tasks'}</span>
             <ClockAlert className="w-4 h-4 text-orange-600 group-hover:scale-110 transition-transform" />
           </div>
           <div className="text-2xl font-bold text-slate-900">{m.overdueTasksCount || 0}</div>
@@ -265,7 +277,7 @@ export default function DashboardPage() {
           className="p-4 bg-white rounded-xl border border-slate-200 hover:border-purple-400 hover:shadow-md transition group"
         >
           <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-xs font-medium">Exception Radar</span>
+            <span className="text-xs font-medium">{isLoanOfficer ? 'My Exceptions' : 'Exception Radar'}</span>
             <AlertOctagon className="w-4 h-4 text-purple-600 group-hover:scale-110 transition-transform" />
           </div>
           <div className="text-2xl font-bold text-slate-900">{m.openExceptionsCount || 0}</div>
@@ -275,7 +287,7 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      {/* Main Grid: Priority Exceptions & Team Workload */}
+      {/* Main Grid: Priority Exceptions & Workload */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 Cols: Priority Exception Radar */}
         <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
@@ -285,24 +297,40 @@ export default function DashboardPage() {
                 <AlertOctagon className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-slate-900">Priority Exception Radar</h3>
-                <p className="text-[11px] text-slate-500">Urgent blockers sorted by closing proximity and severity rules</p>
+                <h3 className="font-bold text-sm text-slate-900">
+                  {isLoanOfficer ? 'My Priority Exceptions Radar' : 'Priority Exception Radar'}
+                </h3>
+                <p className="text-[11px] text-slate-500">
+                  {isLoanOfficer
+                    ? 'Urgent blockers on your assigned files requiring borrower action'
+                    : 'Urgent blockers sorted by closing proximity and severity rules'}
+                </p>
               </div>
             </div>
             <Link
               href="/exceptions"
               className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1"
             >
-              All Exceptions ({m.openExceptionsCount}) <ArrowRight className="w-3 h-3" />
+              All Exceptions ({m.openExceptionsCount || 0}) <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
           <div className="divide-y divide-slate-100">
             {(!data?.priorityIssues || data.priorityIssues.length === 0) ? (
-              <div className="p-8 text-center text-slate-400">
-                <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-                <p className="text-xs font-medium text-slate-600">No urgent blocking exceptions on active loans.</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">All files are progressing normally.</p>
+              <div className="p-12 text-center text-slate-400">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <p className="text-xs font-bold text-slate-800">
+                  {isLoanOfficer
+                    ? 'No blocking exceptions on your files'
+                    : 'No urgent blocking exceptions in branch pipeline'}
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1 max-w-sm mx-auto">
+                  {isLoanOfficer
+                    ? 'Your assigned loan pipeline is clean. Any new file anomalies or missing borrower documents will appear here automatically.'
+                    : 'All borrower applications and conditions are progressing normally.'}
+                </p>
               </div>
             ) : (
               data.priorityIssues.map((exc: any) => (
@@ -355,22 +383,25 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right Col: Team Workload & Activity */}
+        {/* Right Col: Personal / Team Workload & Activity */}
         <div className="space-y-6">
-          {/* Team Workload */}
+          {/* Workload Card */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                <User className="w-4 h-4 text-blue-600" /> Team Workload
+                <User className="w-4 h-4 text-blue-600" />
+                {isLoanOfficer ? 'My Production Status' : 'Team Workload'}
               </h3>
-              <Link href="/team" className="text-xs text-blue-600 font-semibold hover:underline">
-                Manage
-              </Link>
+              {isAdmin && (
+                <Link href="/team" className="text-xs text-blue-600 font-semibold hover:underline">
+                  Manage
+                </Link>
+              )}
             </div>
 
             <div className="space-y-3">
               {data?.teamWorkload?.map((member: any) => (
-                <div key={member.userId} className="p-3 rounded-lg border border-slate-100 bg-slate-50/50">
+                <div key={member.userId} className="p-3 rounded-lg border border-slate-100 bg-slate-50/70">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-xs font-bold text-slate-900">{member.name}</div>
@@ -388,16 +419,17 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Recent Chronological Audit Activity */}
+          {/* Chronological Audit Activity */}
           <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-5">
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-1.5 mb-3">
-              <Activity className="w-4 h-4 text-emerald-600" /> Recent Activity Log
+              <Activity className="w-4 h-4 text-emerald-600" />
+              {isLoanOfficer ? 'My Pipeline Activity' : 'Recent Activity Log'}
             </h3>
             <div className="space-y-3">
-              {data?.recentActivity?.length === 0 ? (
-                <p className="text-xs text-slate-400">No activity logged yet.</p>
+              {(!data?.recentActivity || data.recentActivity.length === 0) ? (
+                <p className="text-xs text-slate-400">No activity recorded on your files yet.</p>
               ) : (
-                data?.recentActivity?.slice(0, 5).map((act: any) => (
+                data.recentActivity.slice(0, 5).map((act: any) => (
                   <div key={act.id} className="text-xs border-l-2 border-blue-500 pl-3 py-0.5 space-y-0.5">
                     <p className="text-slate-800 font-medium leading-snug">{act.details}</p>
                     <div className="text-[10px] text-slate-400 flex items-center gap-2">

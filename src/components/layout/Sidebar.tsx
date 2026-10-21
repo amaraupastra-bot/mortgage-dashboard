@@ -19,6 +19,8 @@ import {
   ChevronRight,
   ExternalLink,
   FormInput,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
 
 interface NavItem {
@@ -27,28 +29,90 @@ interface NavItem {
   icon: React.ElementType;
   badge?: string;
   badgeColor?: string;
+  roles?: ('ADMIN' | 'LOAN_OFFICER' | 'PROCESSOR')[];
 }
 
 const navItems: NavItem[] = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Loans', href: '/loans', icon: FolderKanban },
-  { name: 'Exceptions', href: '/exceptions', icon: AlertOctagon, badge: 'Radar', badgeColor: 'bg-red-500 text-white' },
-  { name: 'Tasks', href: '/tasks', icon: CheckSquare },
-  { name: 'Documents', href: '/documents', icon: FileText },
-  { name: 'Forms', href: '/forms', icon: FormInput, badge: 'Builder', badgeColor: 'bg-indigo-600 text-white' },
-  { name: 'Reports', href: '/reports', icon: BarChart3 },
-  { name: 'Team', href: '/team', icon: Users },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  {
+    name: 'Dashboard',
+    href: '/',
+    icon: LayoutDashboard,
+    roles: ['ADMIN', 'LOAN_OFFICER', 'PROCESSOR'],
+  },
+  {
+    name: 'Loans',
+    href: '/loans',
+    icon: FolderKanban,
+    roles: ['ADMIN', 'LOAN_OFFICER', 'PROCESSOR'],
+  },
+  {
+    name: 'Exceptions',
+    href: '/exceptions',
+    icon: AlertOctagon,
+    badge: 'Radar',
+    badgeColor: 'bg-red-500 text-white',
+    roles: ['ADMIN', 'LOAN_OFFICER', 'PROCESSOR'],
+  },
+  {
+    name: 'Tasks',
+    href: '/tasks',
+    icon: CheckSquare,
+    roles: ['ADMIN', 'LOAN_OFFICER', 'PROCESSOR'],
+  },
+  {
+    name: 'Documents',
+    href: '/documents',
+    icon: FileText,
+    roles: ['ADMIN', 'LOAN_OFFICER', 'PROCESSOR'],
+  },
+  // Admin-Only Workflow Sections
+  {
+    name: 'Forms',
+    href: '/forms',
+    icon: FormInput,
+    badge: 'Admin',
+    badgeColor: 'bg-indigo-600 text-white',
+    roles: ['ADMIN'],
+  },
+  {
+    name: 'Reports',
+    href: '/reports',
+    icon: BarChart3,
+    badge: 'Admin',
+    badgeColor: 'bg-blue-600/80 text-white',
+    roles: ['ADMIN'],
+  },
+  {
+    name: 'Team',
+    href: '/team',
+    icon: Users,
+    badge: 'Admin',
+    badgeColor: 'bg-slate-700 text-white',
+    roles: ['ADMIN'],
+  },
+  {
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings,
+    badge: 'Admin',
+    badgeColor: 'bg-slate-700 text-white',
+    roles: ['ADMIN'],
+  },
 ];
 
 export function Sidebar({ mobileOpen, onClose }: { mobileOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
-  const { workspace } = useAuth();
+  const { workspace, currentUser } = useAuth();
 
   const isCurrent = (href: string) => {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
   };
+
+  // Filter items visible to current user's role
+  const visibleNavItems = navItems.filter(
+    (item) => !item.roles || item.roles.includes(currentUser.role)
+  );
 
   const content = (
     <div className="flex flex-col h-full bg-[#0a1424] text-slate-300 w-64 border-r border-slate-800">
@@ -80,14 +144,43 @@ export function Sidebar({ mobileOpen, onClose }: { mobileOpen?: boolean; onClose
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" title="Active Connection" />
           </div>
         </div>
+
+        {/* 14-Day Free Trial Badge */}
+        <div className="mt-3 p-2.5 rounded-lg bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 border border-amber-500/30 text-xs">
+          <div className="flex items-center justify-between text-amber-300 font-bold mb-1 text-[11px]">
+            <span className="flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              14-Day Pro Free Trial
+            </span>
+            <span className="text-[10px] bg-amber-400/20 text-amber-200 px-1.5 py-0.5 rounded font-mono border border-amber-400/40">
+              11d left
+            </span>
+          </div>
+          <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden my-1.5">
+            <div className="bg-amber-400 h-1.5 rounded-full w-[25%]" />
+          </div>
+          <p className="text-[10px] text-slate-400 leading-tight">
+            Full enterprise broker tier active.
+          </p>
+        </div>
       </div>
 
       {/* Navigation Links */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-          Core Workflows
+        <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+          <span>
+            {currentUser.role === 'ADMIN'
+              ? 'Brokerage Workflows'
+              : currentUser.role === 'LOAN_OFFICER'
+              ? 'Origination Workflows'
+              : 'Processing Workflows'}
+          </span>
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+            {currentUser.role}
+          </span>
         </div>
-        {navItems.map((item) => {
+
+        {visibleNavItems.map((item) => {
           const active = isCurrent(item.href);
           const Icon = item.icon;
           return (
@@ -116,14 +209,20 @@ export function Sidebar({ mobileOpen, onClose }: { mobileOpen?: boolean; onClose
         })}
       </nav>
 
-      {/* Compliance Notice Footer */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-950/40 text-[11px] text-slate-400 leading-relaxed">
-        <p className="font-semibold text-slate-400 flex items-center gap-1">
-          <ShieldCheck className="w-3.5 h-3.5 text-blue-400" /> Human-in-the-Loop
-        </p>
-        <p className="mt-1 text-[10px] text-slate-400">
-          Broker-facing file readiness checks. Not an underwriting guarantee or automated lender approval.
-        </p>
+      {/* User Persona & Role Footer */}
+      <div className="p-3 border-t border-slate-800/80 bg-slate-950/60">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+            {currentUser.name[0]}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-bold text-slate-200 truncate">{currentUser.name}</div>
+            <div className="text-[10px] text-slate-400 truncate flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {currentUser.role === 'ADMIN' ? 'Broker of Record' : currentUser.role === 'LOAN_OFFICER' ? 'Loan Officer' : 'Processor'}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

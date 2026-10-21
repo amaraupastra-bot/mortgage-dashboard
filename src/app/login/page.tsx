@@ -19,6 +19,8 @@ import {
   EyeOff,
   AlertCircle,
   Users,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 function LoginContent() {
@@ -40,6 +42,7 @@ function LoginContent() {
   const [name, setName] = useState(paramName || '');
   const [role, setRole] = useState<UserRole>(paramRole);
   const [showPassword, setShowPassword] = useState(false);
+  const [showDevPersonas, setShowDevPersonas] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -136,6 +139,22 @@ function LoginContent() {
       {/* Main Login Card */}
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4 sm:px-0">
         <div className="bg-white py-8 px-6 sm:px-10 shadow-2xl rounded-2xl border border-slate-200/80">
+          {/* 14-Day Free Trial Notice Banner */}
+          <div className="mb-5 p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div className="text-left">
+                <div className="text-xs font-bold text-slate-900 leading-tight">14-Day Pro Free Trial Active</div>
+                <div className="text-[10px] text-slate-500">11 days remaining &bull; Full enterprise features</div>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md border border-amber-300">
+              PRO TIER
+            </span>
+          </div>
+
           {/* Invite Banner if visiting with token */}
           {isInviteMode && (
             <div className="mb-6 p-3.5 bg-blue-50 border border-blue-200 rounded-xl">
@@ -148,7 +167,7 @@ function LoginContent() {
                     <span className="font-bold underline">
                       {role === 'ADMIN' ? 'Brokerage Admin' : role === 'LOAN_OFFICER' ? 'Loan Officer' : 'Loan Processor'}
                     </span>
-                    . Complete your profile setup below to activate your account.
+                    . Complete your password setup below to activate your account.
                   </p>
                 </div>
               </div>
@@ -277,58 +296,60 @@ function LoginContent() {
             </button>
           </form>
 
-          {/* Quick Demo Persona Switcher */}
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 text-center mb-2.5">
-              Instant One-Click Demo Personas
-            </span>
-            <div className="space-y-1.5">
+          {/* Discreet Dev / Testing Persona Accordion (Hidden from Invitees) */}
+          {!isInviteMode && (
+            <div className="mt-6 pt-5 border-t border-slate-100 text-center">
               <button
                 type="button"
-                onClick={() => handleQuickDemoLogin('s.jenkins@apexlending.com')}
-                className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50/80 hover:bg-blue-50/70 hover:border-blue-300 transition text-left flex items-center justify-between group"
+                onClick={() => setShowDevPersonas(!showDevPersonas)}
+                className="text-[11px] text-slate-400 hover:text-slate-600 font-medium inline-flex items-center gap-1.5 transition"
               >
-                <div>
-                  <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <span>👑 Sarah Jenkins</span>
-                    <span className="text-[10px] text-blue-600 font-semibold">(Broker of Record / Owner)</span>
-                  </div>
-                  <div className="text-[10px] text-slate-400">Full branch visibility, team management & settings</div>
-                </div>
-                <RoleBadge role="ADMIN" />
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>{showDevPersonas ? 'Hide Dev Testing Personas' : 'Dev Testing Switcher (Click to expand)'}</span>
+                {showDevPersonas ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
               </button>
 
-              <button
-                type="button"
-                onClick={() => handleQuickDemoLogin('d.miller@apexlending.com')}
-                className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50/80 hover:bg-blue-50/70 hover:border-blue-300 transition text-left flex items-center justify-between group"
-              >
-                <div>
-                  <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <span>💼 David Miller</span>
-                    <span className="text-[10px] text-emerald-600 font-semibold">(Senior Loan Officer)</span>
-                  </div>
-                  <div className="text-[10px] text-slate-400">Personal assigned loans, 1003 editing & document intake</div>
-                </div>
-                <RoleBadge role="LOAN_OFFICER" />
-              </button>
+              {showDevPersonas && (
+                <div className="mt-3 space-y-1.5 animate-in fade-in duration-150 text-left">
+                  <button
+                    type="button"
+                    onClick={() => handleQuickDemoLogin('s.jenkins@apexlending.com')}
+                    className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50/70 hover:border-blue-300 transition text-left flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-slate-800">👑 Sarah Jenkins (Owner / Admin)</div>
+                      <div className="text-[10px] text-slate-400">Full branch visibility & settings</div>
+                    </div>
+                    <RoleBadge role="ADMIN" />
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => handleQuickDemoLogin('e.ramos@apexlending.com')}
-                className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50/80 hover:bg-blue-50/70 hover:border-blue-300 transition text-left flex items-center justify-between group"
-              >
-                <div>
-                  <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                    <span>📑 Elena Ramos</span>
-                    <span className="text-[10px] text-purple-600 font-semibold">(Senior Loan Processor)</span>
-                  </div>
-                  <div className="text-[10px] text-slate-400">Condition review, document verification & file readiness</div>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickDemoLogin('d.miller@apexlending.com')}
+                    className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50/70 hover:border-blue-300 transition text-left flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-slate-800">💼 David Miller (Loan Officer)</div>
+                      <div className="text-[10px] text-slate-400">Assigned loans & 1003 editing</div>
+                    </div>
+                    <RoleBadge role="LOAN_OFFICER" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleQuickDemoLogin('e.ramos@apexlending.com')}
+                    className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50/70 hover:border-blue-300 transition text-left flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="text-xs font-bold text-slate-800">📑 Elena Ramos (Processor)</div>
+                      <div className="text-[10px] text-slate-400">Document verification & conditions</div>
+                    </div>
+                    <RoleBadge role="PROCESSOR" />
+                  </button>
                 </div>
-                <RoleBadge role="PROCESSOR" />
-              </button>
+              )}
             </div>
-          </div>
+          )}
         </div>
 
         {/* Compliance Footer */}

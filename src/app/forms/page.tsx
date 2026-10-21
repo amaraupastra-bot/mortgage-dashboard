@@ -42,6 +42,7 @@ import {
   Sliders,
   Check,
   Upload,
+  Lock,
 } from 'lucide-react';
 
 const defaultTheme: FormTheme = {
@@ -346,6 +347,28 @@ function FormsContent() {
   };
 
   const selectedField = currentForm?.fields.find((f) => f.id === selectedFieldId);
+
+  const isAdmin = currentUser.role === 'ADMIN';
+
+  if (!isAdmin) {
+    return (
+      <div className="p-8 bg-white border border-slate-200 rounded-2xl text-center max-w-lg mx-auto mt-12 space-y-4 shadow-sm">
+        <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+          <Lock className="w-6 h-6" />
+        </div>
+        <h2 className="text-base font-bold text-slate-900">Form Studio Restricted</h2>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Designing public intake forms, configuring custom borrower lead capture, and embedding widgets is reserved for Brokerage Administrators.
+        </p>
+        <Link
+          href="/"
+          className="inline-flex px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition"
+        >
+          Return to My Working Dashboard
+        </Link>
+      </div>
+    );
+  }
 
   // -------------------------------------------------------------
   // VIEW 1: FORMS LIST VIEW

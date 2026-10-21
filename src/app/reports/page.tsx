@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import {
   BarChart3,
@@ -14,10 +15,12 @@ import {
   ShieldCheck,
   RefreshCw,
   Users,
+  Lock,
 } from 'lucide-react';
 
 export default function ReportsPage() {
-  const { workspace } = useAuth();
+  const { workspace, currentUser } = useAuth();
+  const isAdmin = currentUser.role === 'ADMIN';
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +54,26 @@ export default function ReportsPage() {
           ))}
         </div>
         <div className="h-64 bg-slate-200 rounded-xl" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="p-8 bg-white border border-slate-200 rounded-2xl text-center max-w-lg mx-auto mt-12 space-y-4 shadow-sm">
+        <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+          <Lock className="w-6 h-6" />
+        </div>
+        <h2 className="text-base font-bold text-slate-900">Brokerage Reports Restricted</h2>
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Macro SLA reports, defect rates, and operational brokerage analytics are accessible to Brokerage Administrators.
+        </p>
+        <Link
+          href="/"
+          className="inline-flex px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition"
+        >
+          Return to My Working Dashboard
+        </Link>
       </div>
     );
   }

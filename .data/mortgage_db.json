@@ -60,6 +60,15 @@
       "role": "ADMIN",
       "active": true,
       "createdAt": "2026-01-01T09:00:00Z"
+    },
+    {
+      "name": "Amara",
+      "email": "amaraupastra@gmail.com",
+      "role": "LOAN_OFFICER",
+      "active": true,
+      "id": "usr-1792559465738",
+      "workspaceId": "ws-apex-101",
+      "createdAt": "2026-10-21T05:11:05.738Z"
     }
   ],
   "loans": [
@@ -124,7 +133,7 @@
       "readinessScore": 100,
       "hasBlockingExceptions": false,
       "createdAt": "2026-09-28T09:40:00Z",
-      "updatedAt": "2026-10-20T09:29:10.963Z",
+      "updatedAt": "2026-10-21T05:13:30.136Z",
       "actorId": "usr-2",
       "actorName": "David Miller",
       "actorRole": "LOAN_OFFICER"
@@ -913,6 +922,106 @@
     }
   ],
   "activityLogs": [
+    {
+      "loanId": "loan-3",
+      "loanNumber": "ML-2026-883",
+      "actorId": "usr-1792559465738",
+      "actorName": "Amara",
+      "actorRole": "LOAN_OFFICER",
+      "action": "READINESS_CHECK_EXECUTED",
+      "entityType": "LOAN",
+      "entityId": "loan-3",
+      "details": "Executed File Readiness Check: Score 100%, 0 findings, 0 exceptions synced.",
+      "id": "act-1792559610140-608",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-21T05:13:30.140Z"
+    },
+    {
+      "loanId": "loan-3",
+      "loanNumber": "ML-2026-883",
+      "actorId": "usr-1792559465738",
+      "actorName": "Amara",
+      "actorRole": "LOAN_OFFICER",
+      "action": "READINESS_CHECK_EXECUTED",
+      "entityType": "LOAN",
+      "entityId": "loan-3",
+      "details": "Executed File Readiness Check: Score 100%, 0 findings, 0 exceptions synced.",
+      "id": "act-1792559599739-77",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-21T05:13:19.740Z"
+    },
+    {
+      "actorId": "usr-1792559465738",
+      "actorName": "Amara",
+      "actorRole": "LOAN_OFFICER",
+      "action": "USER_UPDATED",
+      "entityType": "USER",
+      "entityId": "usr-1792559465738",
+      "details": "Invited user activated account & completed password setup: Amara (LOAN_OFFICER) via token inv_1792559465751_lps9k5",
+      "id": "act-1792559505254-576",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-21T05:11:45.254Z"
+    },
+    {
+      "actorId": "usr-1",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "ADMIN",
+      "action": "USER_INVITED",
+      "entityType": "USER",
+      "entityId": "usr-1792559465738",
+      "details": "Invited new team member: Amara (amaraupastra@gmail.com) as LOAN_OFFICER",
+      "id": "act-1792559465743-51",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-21T05:11:05.743Z"
+    },
+    {
+      "actorId": "usr-1",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "ADMIN",
+      "action": "USER_UPDATED",
+      "entityType": "USER",
+      "entityId": "usr-1",
+      "details": "User signed in: Sarah Jenkins (ADMIN)",
+      "id": "act-1792559440576-174",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-21T05:10:40.576Z"
+    },
+    {
+      "actorId": "usr-3",
+      "actorName": "Elena Ramos",
+      "actorRole": "PROCESSOR",
+      "action": "USER_UPDATED",
+      "entityType": "USER",
+      "entityId": "usr-3",
+      "details": "User signed in: Elena Ramos (PROCESSOR)",
+      "id": "act-1792559430762-193",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-21T05:10:30.762Z"
+    },
+    {
+      "actorId": "usr-2",
+      "actorName": "David Miller",
+      "actorRole": "LOAN_OFFICER",
+      "action": "USER_UPDATED",
+      "entityType": "USER",
+      "entityId": "usr-2",
+      "details": "User signed in: David Miller (LOAN_OFFICER)",
+      "id": "act-1792559430285-934",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-21T05:10:30.285Z"
+    },
+    {
+      "actorId": "usr-1",
+      "actorName": "Sarah Jenkins",
+      "actorRole": "ADMIN",
+      "action": "USER_UPDATED",
+      "entityType": "USER",
+      "entityId": "usr-1",
+      "details": "User signed in: Sarah Jenkins (ADMIN)",
+      "id": "act-1792559430153-239",
+      "workspaceId": "ws-apex-101",
+      "timestamp": "2026-10-21T05:10:30.153Z"
+    },
     {
       "loanId": "loan-1",
       "loanNumber": "ML-2026-881",
