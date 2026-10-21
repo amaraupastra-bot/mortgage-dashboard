@@ -14,6 +14,7 @@ import {
   UserCheck,
   ShieldAlert,
   ExternalLink,
+  LogOut,
 } from 'lucide-react';
 
 export function Header({
@@ -140,6 +141,16 @@ export function Header({
                     <RoleBadge role={u.role} />
                   </button>
                 ))}
+              </div>
+              <div className="border-t border-slate-100 my-1 pt-1 px-1">
+                <Link
+                  href="/login"
+                  onClick={() => setShowUserMenu(false)}
+                  className="w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition text-xs font-medium"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Sign In as Another Member / Logout</span>
+                </Link>
               </div>
             </div>
           )}

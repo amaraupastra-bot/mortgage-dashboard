@@ -21,6 +21,7 @@ import {
   ChevronRight,
   ExternalLink,
   RefreshCw,
+  Building2,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -115,6 +116,69 @@ export default function DashboardPage() {
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Tenant Isolated: {workspace.name}
           </div>
+        </div>
+      </div>
+
+      {/* Role-Specific Perspective Banner */}
+      <div className="p-4 bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white rounded-xl shadow-md border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
+            {currentUser.role === 'ADMIN' ? (
+              <Building2 className="w-5 h-5 text-amber-300" />
+            ) : currentUser.role === 'LOAN_OFFICER' ? (
+              <User className="w-5 h-5 text-emerald-300" />
+            ) : (
+              <Activity className="w-5 h-5 text-purple-300" />
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="font-bold text-sm tracking-tight text-white">
+                {currentUser.role === 'ADMIN'
+                  ? `Brokerage Owner & Admin: ${currentUser.name}`
+                  : currentUser.role === 'LOAN_OFFICER'
+                  ? `Loan Officer Production Hub: ${currentUser.name}`
+                  : `Loan Processor Operations Hub: ${currentUser.name}`}
+              </h2>
+              <span className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded text-white uppercase tracking-wider">
+                {currentUser.role}
+              </span>
+            </div>
+            <p className="text-xs text-blue-200 mt-0.5">
+              {currentUser.role === 'ADMIN'
+                ? 'Branch-wide oversight across all originators, team permissions, custom form controls, and enterprise settings.'
+                : currentUser.role === 'LOAN_OFFICER'
+                ? 'Viewing your active origination pipeline, Form 1003 applications, and borrower document completeness.'
+                : 'Prioritizing document review inbox, lender underwriting condition sign-offs, and file clearance.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {currentUser.role === 'LOAN_OFFICER' && (
+            <Link
+              href={`/loans?ownerId=${currentUser.id}`}
+              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg shadow-sm transition"
+            >
+              My Assigned Files Only &rarr;
+            </Link>
+          )}
+          {currentUser.role === 'PROCESSOR' && (
+            <Link
+              href="/documents?status=Review Required"
+              className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-lg shadow-sm transition"
+            >
+              Document Review Inbox &rarr;
+            </Link>
+          )}
+          {currentUser.role === 'ADMIN' && (
+            <Link
+              href="/team"
+              className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold rounded-lg transition"
+            >
+              Manage Team & Invites
+            </Link>
+          )}
         </div>
       </div>
 

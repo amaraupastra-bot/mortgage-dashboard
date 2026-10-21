@@ -916,6 +916,14 @@ export function updateUser(workspaceId: string, id: string, updates: Partial<Use
   return db.users[idx];
 }
 
+export function deleteUser(workspaceId: string, id: string): boolean {
+  const db = getDatabase();
+  const prevLen = db.users.length;
+  db.users = db.users.filter((u) => !(u.workspaceId === workspaceId && u.id === id));
+  saveDatabase(db);
+  return db.users.length < prevLen;
+}
+
 export function generateDefault1003(loan: Loan): Form1003Data {
   const isRefi = (loan.loanProgram || '').toLowerCase().includes('refinance');
   const baseIncome = Math.max(7500, Math.round(loan.loanAmount / 38));

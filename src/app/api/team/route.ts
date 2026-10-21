@@ -3,6 +3,7 @@ import {
   getAllUsers,
   createUser,
   updateUser,
+  deleteUser,
   logActivity,
 } from '@/lib/db';
 
@@ -100,6 +101,55 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: updated });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const workspaceId = searchParams.get('workspaceId') || 'ws-apex-101';
+    const actorRole = searchParams.get('actorRole') || 'ADMIN';
+    const actorName = searchParams.get('actorName') || 'Sarah Jenkins';
+    const actorId = searchParams.get('actorId') || 'usr-1';
+
+    if (actorRole !== 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Only Brokerage Admins may delete team members.' },
+        { status: 403 }
+      );
+    }
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'User ID is required' }, { status: 400 });
+    }
+
+    // Do not allow deleting current self or primary root admin
+    if (id === actorId || id === 'usr-1') {
+      return NextResponse.json(
+        { success: false, error: 'Cannot delete the primary brokerage administrator account.' },
+        { status: 400 }
+      );
+    }
+
+    const removed = deleteUser(workspaceId, id);
+    if (!removed) {
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+    }
+
+    logActivity(workspaceId, {
+      actorId,
+      actorName,
+      actorRole,
+      action: 'USER_DELETED',
+      entityType: 'USER',
+      entityId: id,
+      details: `Removed team member ${id} from workspace`,
+    });
+
+    return NextResponse.json({ success: true, message: 'User removed successfully' });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

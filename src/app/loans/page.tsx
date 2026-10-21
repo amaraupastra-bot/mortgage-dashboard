@@ -28,6 +28,7 @@ function LoansContent() {
   const searchParams = useSearchParams();
   const initialStage = searchParams.get('stage') || 'all';
   const initialBlockers = searchParams.get('hasBlockers') === 'true';
+  const initialOwner = searchParams.get('ownerId') || 'all';
 
   const { workspace, currentUser, availableUsers } = useAuth();
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -37,7 +38,7 @@ function LoansContent() {
   // Filters & Search
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStage, setSelectedStage] = useState<string>(initialStage);
-  const [selectedOwner, setSelectedOwner] = useState<string>('all');
+  const [selectedOwner, setSelectedOwner] = useState<string>(initialOwner);
   const [onlyBlockers, setOnlyBlockers] = useState<boolean>(initialBlockers);
   const [sortField, setSortField] = useState<'closingDate' | 'amount' | 'readiness'>('closingDate');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -142,6 +143,45 @@ function LoansContent() {
           <RefreshCw className="w-3.5 h-3.5" />
           Refresh
         </button>
+      </div>
+
+      {/* Role Context Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-100/80 border border-slate-200 rounded-xl text-xs">
+        <div className="flex items-center gap-2">
+          <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
+          <span className="text-slate-600">
+            Active Role: <strong className="text-slate-900">{currentUser.name}</strong> ({currentUser.role === 'ADMIN' ? 'Brokerage Admin / Owner' : currentUser.role === 'LOAN_OFFICER' ? 'Loan Officer' : 'Loan Processor'})
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setSelectedOwner(currentUser.id);
+              setCurrentPage(1);
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              selectedOwner === currentUser.id
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
+            }`}
+          >
+            My Assigned Files
+          </button>
+          <button
+            onClick={() => {
+              setSelectedOwner('all');
+              setCurrentPage(1);
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              selectedOwner === 'all'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
+            }`}
+          >
+            All Branch Files
+          </button>
+        </div>
       </div>
 
       {/* Search & Filter Bar */}

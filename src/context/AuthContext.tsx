@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { User, Workspace, UserRole } from '@/types';
 
 interface AuthContextType {
@@ -10,6 +10,16 @@ interface AuthContextType {
   switchUser: (userId: string) => void;
   availableUsers: User[];
   availableWorkspaces: Workspace[];
+  login: (email: string, password?: string) => Promise<{ success: boolean; user?: User; error?: string }>;
+  logout: () => void;
+  acceptInvite: (params: {
+    token: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    password?: string;
+  }) => Promise<{ success: boolean; user?: User; error?: string }>;
+  refreshUsers: () => Promise<void>;
 }
 
 const defaultWorkspaces: Workspace[] = [
@@ -29,7 +39,7 @@ const defaultWorkspaces: Workspace[] = [
   },
 ];
 
-const allUsers: User[] = [
+const fallbackUsers: User[] = [
   {
     id: 'usr-1',
     workspaceId: 'ws-apex-101',
@@ -66,24 +76,33 @@ const allUsers: User[] = [
     active: true,
     createdAt: '2026-02-10T11:15:00Z',
   },
-  {
-    id: 'usr-isolated',
-    workspaceId: 'ws-summit-202',
-    name: 'Tom Bradley',
-    email: 't.bradley@summitcoast.com',
-    role: 'ADMIN',
-    active: true,
-    createdAt: '2026-01-01T09:00:00Z',
-  },
 ];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [workspace, setWorkspace] = useState<Workspace>(defaultWorkspaces[0]);
-  const [currentUser, setCurrentUser] = useState<User>(allUsers[0]);
+  const [currentUser, setCurrentUser] = useState<User>(fallbackUsers[0]);
+  const [userList, setUserList] = useState<User[]>(fallbackUsers);
 
-  // Load from localStorage if present on client
+  // Sync users from DB for the active workspace
+  const refreshUsers = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/team?workspaceId=${workspace.id}`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+        setUserList(json.data);
+      }
+    } catch {
+      // Fallback stays in place
+    }
+  }, [workspace.id]);
+
+  useEffect(() => {
+    refreshUsers();
+  }, [refreshUsers]);
+
+  // Load saved session on mount
   useEffect(() => {
     const savedWs = localStorage.getItem('ml_workspace_id');
     const savedUsr = localStorage.getItem('ml_user_id');
@@ -93,10 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (found) setWorkspace(found);
     }
     if (savedUsr) {
-      const found = allUsers.find((u) => u.id === savedUsr);
+      const found = userList.find((u) => u.id === savedUsr) || fallbackUsers.find((u) => u.id === savedUsr);
       if (found) setCurrentUser(found);
     }
-  }, []);
+  }, [userList]);
 
   const switchWorkspace = (workspaceId: string) => {
     const foundWs = defaultWorkspaces.find((w) => w.id === workspaceId) || defaultWorkspaces[0];
@@ -104,20 +123,87 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('ml_workspace_id', foundWs.id);
 
     // Pick a user matching this workspace
-    const userInWs = allUsers.find((u) => u.workspaceId === foundWs.id) || allUsers[0];
+    const userInWs = userList.find((u) => u.workspaceId === foundWs.id) || fallbackUsers[0];
     setCurrentUser(userInWs);
     localStorage.setItem('ml_user_id', userInWs.id);
   };
 
   const switchUser = (userId: string) => {
-    const foundUser = allUsers.find((u) => u.id === userId);
+    const foundUser = userList.find((u) => u.id === userId) || fallbackUsers.find((u) => u.id === userId);
     if (foundUser) {
       setCurrentUser(foundUser);
       localStorage.setItem('ml_user_id', foundUser.id);
     }
   };
 
-  const availableUsers = allUsers.filter((u) => u.workspaceId === workspace.id);
+  const login = async (email: string, password?: string): Promise<{ success: boolean; user?: User; error?: string }> => {
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'login',
+          email,
+          password,
+          workspaceId: workspace.id,
+        }),
+      });
+
+      const json = await res.json();
+      if (!json.success) {
+        return { success: false, error: json.error || 'Authentication failed' };
+      }
+
+      const user = json.data as User;
+      setCurrentUser(user);
+      localStorage.setItem('ml_user_id', user.id);
+      await refreshUsers();
+      return { success: true, user };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Network error during sign in' };
+    }
+  };
+
+  const acceptInvite = async (params: {
+    token: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    password?: string;
+  }): Promise<{ success: boolean; user?: User; error?: string }> => {
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'accept-invite',
+          ...params,
+          workspaceId: workspace.id,
+        }),
+      });
+
+      const json = await res.json();
+      if (!json.success) {
+        return { success: false, error: json.error || 'Failed to accept invitation' };
+      }
+
+      const user = json.data as User;
+      setCurrentUser(user);
+      localStorage.setItem('ml_user_id', user.id);
+      await refreshUsers();
+      return { success: true, user };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Network error during invite acceptance' };
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('ml_user_id');
+    // Switch to Sarah Jenkins or redirect
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -126,8 +212,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         currentUser,
         switchWorkspace,
         switchUser,
-        availableUsers,
+        availableUsers: userList,
         availableWorkspaces: defaultWorkspaces,
+        login,
+        logout,
+        acceptInvite,
+        refreshUsers,
       }}
     >
       {children}
